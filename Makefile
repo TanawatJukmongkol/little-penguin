@@ -1,9 +1,9 @@
 
-BAK_CFG=/boot/config-6.14.0
-CC=cc
+BAK_CFG		= /boot/config-6.14.0
+CC		= cc
 
-BUILD_JOBS=$(shell expr $(shell nproc) \* 3 / 2)
-MAKE_FLAGS=-j$(BUILD_JOBS) -l$(shell nproc)
+BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
+MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
 all: config build
 

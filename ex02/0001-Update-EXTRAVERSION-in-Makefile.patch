@@ -1,0 +1,11 @@
+--- a/Makefile	2025-04-27 19:01:58.549870462 +0700
++++ b/Makefile	2025-04-27 18:56:42.164558484 +0700
+@@ -2,7 +2,7 @@
+ VERSION = 6
+ PATCHLEVEL = 14
+ SUBLEVEL = 0
+-EXTRAVERSION =
++EXTRAVERSION = -thor_kernel
+ NAME = Baby Opossum Posse
+
+ # *DOCUMENTATION*

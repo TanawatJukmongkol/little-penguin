@@ -2,7 +2,9 @@
 # Settings
 NAME		= hello
 CC		= cc
-MAKE_FLAGS	= "-j8"
+CFLAGS		= -Wall -Werror -Wextra
+BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
+MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
 KERN_VERSION	= $(shell uname -r)
@@ -21,19 +23,22 @@ HEADERS		= $(addprefix include/, \
 $(NAME)-y	= $(SRCS:.c=.o)
 obj-m		= $(NAME).o
 
-all: $(NAME).ko
+all: ../linux $(NAME).ko
+
+../linux:
+	make -C .. linux
 
 $(NAME).ko: $(SRCS) $(HEADERS)
 	make -C $(KERN_BUILD) \
-	M=$(shell pwd) CC=$(CC) \
+	M=$(shell pwd) CC=$(CC) CFLAGS=$(CFLAGS) \
 	$(MAKE_FLAGS) modules
 
 clean:
 	make -C $(KERN_BUILD) \
-	M=$(shell pwd) CC=$(CC) \
+	M=$(shell pwd) CC=$(CC) CFLAGS=$(CFLAGS) \
 	$(MAKE_FLAGS) clean
 
-format:
+format: all
 	../linux/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
 re: clean all

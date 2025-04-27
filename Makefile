@@ -1,9 +1,11 @@
 
 BAK_CFG=/boot/config-6.14.0
 CC=cc
-MAKE_FLAGS="-j8"
 
-all: config build install
+BUILD_JOBS=$(shell expr $(shell nproc) \* 3 / 2)
+MAKE_FLAGS=-j$(BUILD_JOBS) -l$(shell nproc)
+
+all: config build
 
 # Latest as of project start. ("5 weeks ago")
 
@@ -27,4 +29,14 @@ build:
 install:
 	sudo bash tools/install-linux.sh
 
-.PHONY: mrproper config build install
+# WARNING! Experimental.
+# TODO: Fully debuggable environment without the use of previous LFS image.
+vm:
+	qemu-system-x86_64 \
+		-kernel ./linux/arch/x86_64/boot/bzImage \
+		-append "console=ttyS0" \
+		-m 512 \
+		--enable-kvm \
+		-cpu host
+
+.PHONY: mrproper config build install vm

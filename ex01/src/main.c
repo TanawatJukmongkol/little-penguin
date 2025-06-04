@@ -2,7 +2,7 @@
 #include "../include/main.h"
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Tanawat Jukmongkol");
+MODULE_AUTHOR("tjukmong");
 
 int init_module(void)
 {

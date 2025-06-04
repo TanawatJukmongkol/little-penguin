@@ -17,6 +17,9 @@
           name = "kernel-dev-shell";
 
           buildInputs = with pkgs; [
+            git
+            stdenv
+            gnumake
             gcc
             clang
             binutils
@@ -34,7 +37,6 @@
             ncurses.dev
             libelf
             python3
-            git
             ccache
             util-linux
           ];

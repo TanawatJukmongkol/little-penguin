@@ -16,7 +16,6 @@ SRCS		= $(addprefix src/, \
 )
 
 HEADERS		= $(addprefix include/, \
-	main.h \
 )
 
 # Kernel build variables

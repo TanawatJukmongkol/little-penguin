@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
-#include "../include/main.h"
+#include <linux/kernel.h>
+#include <linux/module.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("tjukmong");

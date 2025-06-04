@@ -1,15 +1,15 @@
 {
     // editor
     "[c]": {
-        "editor.defaultFormatter": "ebextensions.clang-format-2025",
+        "editor.defaultFormatter": "xaver.clang-format",
     },
     "editor.formatOnSave": true,
     "editor.tabSize": 8,
     // clangd
     "clangd.enable": true,
-    "clangd.path": "/nix/store/wk1jfs2qf3v3vgcblla522d279siibbv-clang-19.1.7/bin/clangd",
+    "clangd.path": "/run/current-system/sw/bin/clangd",
     // clang-format
-    "clang-format.executable.linux": "/nix/store/wk1jfs2qf3v3vgcblla522d279siibbv-clang-19.1.7/bin/clang-format",
+    "clang-format.executable.linux": "/run/current-system/sw/bin/clang-format",
     // "clang-format.language.c.style": "${workspaceRoot}/linux",
     // "clang-format.assumeFilename": ".clang-format",
 }

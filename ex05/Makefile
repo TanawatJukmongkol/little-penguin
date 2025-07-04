@@ -1,6 +1,6 @@
 
 # Settings
-NAME		= main
+NAME		= driver
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)

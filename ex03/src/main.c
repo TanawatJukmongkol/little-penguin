@@ -14,13 +14,14 @@ int do_work(int *my_int, int retval)
 	int y = *my_int;
 	int z;
 
-	for (x = 0; x < (unsigned long)my_int; ++x)
-		usleep_range(10, 15);
-	if (y < 10)
+	for (x = 0; x < my_int; ++x)
+		udelay(10);
+	if (y < 10) {
 		/* That was a long sleep, tell userspace about it */
 		pr_info("We slept a long time!");
-	z = x * y;
-	return z;
+		z = x * y;
+		return z;
+	}
 	return 1;
 }
 
@@ -35,5 +36,6 @@ int my_init(void)
 void my_exit(void)
 {
 }
+
 module_init(my_init);
 module_exit(my_exit);

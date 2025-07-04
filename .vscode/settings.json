@@ -1,10 +1,10 @@
 {
     // editor
     "[c]": {
-        "editor.defaultFormatter": "xaver.clang-format",
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
     },
     "editor.formatOnSave": true,
-    "editor.tabSize": 8,
+    // "editor.tabSize": 8,
     // clangd
     "clangd.enable": true,
     "clangd.path": "/run/current-system/sw/bin/clangd",

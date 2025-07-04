@@ -1,0 +1,1 @@
+SUBSYSTEM=="usb", ACTION=="add", ATTR{bInterfaceClass}=="03", ATTR{bInterfaceProtocol}=="01", ENV{DEVPATH}=="/devices/*", RUN+="/usr/local/bin/keyboard_driver.sh $env{DEVPATH}"

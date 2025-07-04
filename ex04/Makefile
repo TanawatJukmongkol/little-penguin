@@ -1,6 +1,6 @@
 
 # Settings
-NAME		= main
+NAME		= keyboard-driver
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
@@ -43,4 +43,18 @@ format: all
 
 re: clean all
 
-.PHONY: all clean format re
+install-rules:
+	sudo cp 10-keyboard.rules /etc/udev/rules.d/10-keyboard.rules
+	sudo cp keyboard_driver.sh /usr/local/bin/keyboard_driver.sh
+	sudo chmod +x /usr/local/bin/keyboard_driver.sh
+	sudo sed -i 's|$$KMOD_DIR|'${PWD}'|g' /usr/local/bin/keyboard_driver.sh
+	sudo sed -i 's|$$KNAME|'${NAME}'|g' /usr/local/bin/keyboard_driver.sh
+	sudo udevadm control --reload-rules && sudo udevadm trigger
+
+uninstall-rules:
+	sudo rm -f /etc/udev/rules.d/10-keyboard.rules
+	sudo rm -f /usr/local/bin/keyboard_driver.sh
+
+reinstall-rules: uninstall-rules install-rules
+
+.PHONY: all clean format re install-rules uninstall-rules reinstall-rules

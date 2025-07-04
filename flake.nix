@@ -13,15 +13,15 @@
           inherit system;
         };
       in {
-        devShells.default = pkgs.mkShell {
+        devShells.default = pkgs.mkShell.override {
+          stdenv = pkgs.gcc14Stdenv;
+        } {
           name = "kernel-dev-shell";
 
           buildInputs = with pkgs; [
             git
             stdenv
             gnumake
-            gcc
-            clang
             binutils
             bc
             bison
@@ -39,12 +39,9 @@
             python3
             ccache
             util-linux
+            linux_6_14
+            bear
           ];
-
-          shellHook = ''
-            mkdir -p "$TMPDIR"
-            trap "rm -rf $TMPDIR" EXIT
-          '';
         };
       });
 }

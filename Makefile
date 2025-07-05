@@ -69,10 +69,6 @@ KERNEL_DEBUG = \
 		-kernel ./linux/arch/x86_64/boot/bzImage \
 		-append "$(KERN_FLAGS_DEBUG)"
 
-KERNEL_USB_DISABLED = \
-		-kernel ./linux/arch/x86_64/boot/bzImage \
-		-append "$(KERN_FLAGS_DEBUG) usbhid.quirks=0x24ae:0x2013:0x0004,0x04ca:0x007d:0x0004,0x046d:0xc339:0x0004"
-
 vm:
 	qemu-system-x86_64 \
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU)
@@ -80,13 +76,6 @@ vm:
 vm-usb:
 	qemu-system-x86_64 \
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU) \
-		-usb \
-		-device piix3-usb-uhci,id=uhci \
-		-device usb-host,hostbus=1,hostport=2,bus=uhci.0
-
-vm-usb-disabled:
-	qemu-system-x86_64 \
-		$(KERNEL_USB_DISABLED) $(BASE_QEMU) $(DEBUG_QEMU) \
 		-usb \
 		-device piix3-usb-uhci,id=uhci \
 		-device usb-host,hostbus=1,hostport=2,bus=uhci.0

@@ -13,9 +13,11 @@ KERN_BUILD		= ../linux
 # Source files
 SRCS		= $(addprefix src/, \
 	main.c \
+	usb_events.c \
 )
 
 HEADERS		= $(addprefix include/, \
+	main.h \
 )
 
 # Kernel build variables
@@ -23,7 +25,7 @@ $(NAME)-y	+= $(SRCS:.c=.o)
 ccflags-y	+= $(CFLAGS)
 obj-m		+= $(NAME).o
 
-all: ../linux $(NAME).ko
+all: ../linux $(NAME).ko Makefile
 
 ../linux:
 	make -C ..
@@ -39,7 +41,7 @@ clean:
 	$(MAKE_FLAGS) clean
 
 format: all
-	../linux/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
+	../linux/scripts/checkpatch.pl -strict -no-tree -file $(SRCS) $(HEADERS)
 
 re: clean all
 

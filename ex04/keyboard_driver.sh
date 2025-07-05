@@ -8,8 +8,9 @@ USB_SYSFS=/sys/bus/usb/drivers/usbhid/$(basename "/sys$DEVPATH" | cut -f1 -d":")
 for intf_path in $USB_SYSFS; do
     intf_name=$(basename "$intf_path")
     if [ -e "/sys/bus/usb/drivers/usbhid/$intf_name" ]; then
+        old_driver=/sys/bus/usb/drivers/usbhid/$intf_name/driver
         # Unbinds current driver in use
-        echo -n "$intf_name" > /sys/bus/usb/drivers/usbhid/unbind
+        echo -n "$intf_name" > $old_driver/unbind
         # Rebinds driver to our custom driver
         echo -n "$intf_name" > /sys/bus/usb/drivers/keyboard_driver/bind
     fi

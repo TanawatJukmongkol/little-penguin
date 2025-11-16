@@ -56,6 +56,7 @@ install-rules:
 uninstall-rules:
 	sudo rm -f /etc/udev/rules.d/10-keyboard.rules
 	sudo rm -f /usr/local/bin/keyboard_driver.sh
+	sudo udevadm control --reload-rules && sudo udevadm trigger
 
 reinstall-rules: uninstall-rules install-rules
 

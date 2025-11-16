@@ -78,7 +78,8 @@ vm-usb:
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU) \
 		-usb \
 		-device piix3-usb-uhci,id=uhci \
-		-device usb-host,hostbus=1,hostport=2,bus=uhci.0
+		-device usb-host,hostbus=1,hostport=2,bus=uhci.0 \
+		-device usb-host,hostbus=1,hostport=1,bus=uhci.0
 
 vm-gui:
 	qemu-system-x86_64 \

@@ -1,6 +1,6 @@
 
 # Settings
-NAME		= driver
+NAME		= fourtytwo
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
@@ -13,9 +13,12 @@ KERN_BUILD		= ../linux
 # Source files
 SRCS		= $(addprefix src/, \
 	main.c \
+	chardev_utils.c \
+	chardev_fops.c \
 )
 
 HEADERS		= $(addprefix include/, \
+	main.h \
 )
 
 # Kernel build variables

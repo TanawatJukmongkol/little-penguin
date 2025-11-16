@@ -1,6 +1,6 @@
 
 # Settings
-NAME		= fourtytwo
+NAME		= debugfs
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
@@ -13,12 +13,9 @@ KERN_BUILD		= ../linux
 # Source files
 SRCS		= $(addprefix src/, \
 	main.c \
-	chardev_utils.c \
-	chardev_fops.c \
 )
 
 HEADERS		= $(addprefix include/, \
-	main.h \
 )
 
 # Kernel build variables
@@ -44,16 +41,6 @@ clean:
 format: all
 	../linux/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
-install-rules:
-	sudo cp 99-fourtytwo.rules /etc/udev/rules.d/99-fourtytwo.rules
-	sudo udevadm control --reload-rules && sudo udevadm trigger
-
-uninstall-rules:
-	sudo rm -f /etc/udev/rules.d/99-fourtytwo.rules
-	sudo udevadm control --reload-rules && sudo udevadm trigger
-
-reinstall-rules: uninstall-rules install-rules
-
-re: clean all install-rules uninstall-rules
+re: clean all
 
 .PHONY: all clean format re

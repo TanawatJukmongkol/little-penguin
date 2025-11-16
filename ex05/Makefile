@@ -54,6 +54,6 @@ uninstall-rules:
 
 reinstall-rules: uninstall-rules install-rules
 
-re: clean all install-rules uninstall-rules
+re: clean all
 
-.PHONY: all clean format re
+.PHONY: all clean format re install-rules uninstall-rules

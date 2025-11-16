@@ -54,9 +54,7 @@ void usb_disconnect(struct usb_interface *intf)
 {
 	struct kbd_dev_info *info = usb_get_intfdata(intf);
 
-	pr_info("keyboard_driver: %s disconnected.\n", info->product);
-	devices--;
-	if (devices == 0) {
+	pr_info("keyboard_driver: %s disconnected. %d devices left\n", info->product, devices - 1);
+	if (--devices == 0)
 		rm_thread = kthread_run(self_rm_fn, NULL, "self_rm_thread");
-	}
 }

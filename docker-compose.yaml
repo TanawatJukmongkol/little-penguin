@@ -1,0 +1,22 @@
+name: "little-penguin"
+
+services:
+  dev-container:
+    image: dev-container:latest
+    build: .devcontainer/src/dev-container/
+    command: sleep infinity
+    environment:
+      - HOME:/ws
+      - DISPLAY:${DISPLAY}
+    volumes:
+      - .:/ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /home/tjukmong/sgoinfre/virtmanager:/ft_linux
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/kvm:/dev/kvm
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - ALL
+    network_mode: "bridge"

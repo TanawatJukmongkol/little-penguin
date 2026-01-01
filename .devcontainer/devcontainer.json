@@ -1,0 +1,14 @@
+{
+    "name": "little-penguin",
+    "dockerComposeFile": "../docker-compose.yaml",
+    "service": "dev-container",
+    "workspaceFolder": "/ws",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "llvm-vs-code-extensions.vscode-clangd",
+                "xaver.clang-format"
+            ]
+        }
+    }
+}

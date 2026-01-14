@@ -4,8 +4,11 @@ CC			= cc
 
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 MAKE_FLAGS	= \
+	LLVM=1 \
 	ARCH=x86_64 \
 	-j$(BUILD_JOBS) -l$(shell nproc)
+
+VM_DISK     = /ft_linux/lfs.qcow2
 
 all: linux build
 
@@ -13,6 +16,7 @@ all: linux build
 
 linux:
 	git clone --depth 1 --branch v6.14 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+	cp ex00/config linux/.config
 
 .clang-format:
 	ln -s linux/.clang-format .
@@ -41,8 +45,8 @@ BASE_QEMU = \
 		-net nic \
 		-net user,id=vmnic,hostfwd=tcp::2222-:22 \
 		-device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=qemu_share \
-		-bios /nix/store/0wbr8qhmbddqd419hfapj3pkzn71xrq1-OVMF-202402-fd/FV/OVMF.fd \
-		-hda ./img/lfs.qcow2 \
+		-bios /usr/share/ovmf/OVMF.fd \
+		-hda $(VM_DISK) \
 		-k de \
 		-m 4G \
 		-smp sockets=1,cores=4,threads=4 \

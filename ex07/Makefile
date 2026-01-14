@@ -2,7 +2,7 @@
 # Settings
 NAME		= debugfs
 CC			= cc
-CFLAGS		= -Wall -Werror -Wextra -g -DDEBUG
+CFLAGS		= -Wall -Werror -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
@@ -13,9 +13,12 @@ KERN_BUILD		= ../linux
 # Source files
 SRCS		= $(addprefix src/, \
 	main.c \
+	debugfs.c \
+	debug_id.c \
 )
 
 HEADERS		= $(addprefix include/, \
+	debugfs.h \
 )
 
 # Kernel build variables

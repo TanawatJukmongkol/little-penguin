@@ -1,3 +1,10 @@
+From db141aa41c8d95ad619ebfa0ff5320b7e83eecbe Mon Apr 28 04:01:17 2025
+From: Tanawat Jukmongkol <tanawat.jukmon@gmail.com>
+Date: Mon Apr 28 05:13:05 2025 +0700
+Subject: [PATCH] BLFS: [Upstream] ThorKernel: Makefile: Add Linux extra version
+ for ThorKernel
+
+Signed-off-by Tanawat Jukmongkol <tanawat.jukmon@gmail.com>
 --- a/Makefile	2025-04-27 19:01:58.549870462 +0700
 +++ b/Makefile	2025-04-27 18:56:42.164558484 +0700
 @@ -2,7 +2,7 @@

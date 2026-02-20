@@ -17,11 +17,13 @@ static t_debug	debugfs = (t_debug) {
         },
         {
             .name = "jiffies", .type = DBG_FILE,
-            .perm = S_IRUGO
+            .perm = S_IRUGO,
+            .init_file = debug_jiffies_init
         },
         {
             .name = "foo", .type = DBG_FILE,
-            .perm = S_IRUGO | S_IWUSR
+            .perm = S_IRUGO | S_IWUSR,
+            .init_file = debug_foo_init
         },
         { .type = DBG_END }
     }

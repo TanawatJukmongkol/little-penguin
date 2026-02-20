@@ -26,6 +26,8 @@ int init_debugfs(t_debug *dbg)
         break ;
         case DBG_FILE:
             printk("debugfs: file name: \"%s\"\n", dbg->name);
+            if (dbg->init_file == NULL)
+                return 0;
             if ((error = dbg->init_file(dbg)) != 0)
                 return error;
             dbg->root = debugfs_create_file(dbg->name, dbg->perm, dbg->parent->root, NULL, &dbg->fops);

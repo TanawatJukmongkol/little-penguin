@@ -9,6 +9,7 @@ MAKE_FLAGS	= \
 	-j$(BUILD_JOBS) -l$(shell nproc)
 
 VM_DISK     = /ft_linux/lfs.qcow2
+ROOT_PART		= /dev/sda1
 
 all: linux build
 
@@ -54,7 +55,7 @@ BASE_QEMU = \
 		-machine type=pc,accel=kvm \
 
 KERN_FLAGS = \
-		root=/dev/sda4 \
+		root=$(ROOT_PART) \
 		loglevel=4
 
 KERN_FLAGS_DEBUG = $(KERN_FLAGS) \

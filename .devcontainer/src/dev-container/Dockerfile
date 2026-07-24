@@ -42,4 +42,5 @@ RUN ln -f /usr/bin/clang-16        /usr/bin/clang \
  && ln -f /usr/bin/llvm-nm-16      /usr/bin/llvm-nm \
  && ln -f /usr/bin/llvm-objcopy-16 /usr/bin/llvm-objcopy \
  && ln -f /usr/bin/llvm-strip-16   /usr/bin/llvm-strip \
- && ln -f /usr/bin/llvm-readelf-16 /usr/bin/llvm-readelf
+ && ln -f /usr/bin/llvm-readelf-16 /usr/bin/llvm-readelf \
+ && ln -f /usr/bin/llvm-objdump-16 /usr/bin/llvm-objdump

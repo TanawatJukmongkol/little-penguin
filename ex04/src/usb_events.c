@@ -46,8 +46,7 @@ int usb_probe(struct usb_interface *intf, const struct usb_device_id *id)
 	devices++;
 	return 0;
 }
-
-// printk(KERN_INFO "keyboard_driver: remove interface: %d\n",
+// RN_INFO "keyboard_driver: remove interface: %d\n",
 //        intf->cur_altsetting->desc.bInterfaceNumber);
 
 void usb_disconnect(struct usb_interface *intf)

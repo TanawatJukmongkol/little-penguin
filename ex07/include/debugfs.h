@@ -30,4 +30,7 @@ typedef struct s_debug {
 
 int init_debugfs(t_debug *dbg);
 
+int debug_foo_init(t_debug *dbg);
 int debug_id_init(t_debug *dbg);
+int debug_jiffies_init(t_debug *dbg);
+

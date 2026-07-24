@@ -14,7 +14,11 @@ KERN_BUILD		= ../linux
 SRCS		= $(addprefix src/, \
 	main.c \
 	debugfs.c \
-	debug_id.c \
+	$(addprefix debug/, \
+		debug_foo.c \
+		debug_id.c \
+		debug_jiffies.c \
+	) \
 )
 
 HEADERS		= $(addprefix include/, \

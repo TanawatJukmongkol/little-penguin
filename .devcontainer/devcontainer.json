@@ -7,7 +7,8 @@
         "vscode": {
             "extensions": [
                 "llvm-vs-code-extensions.vscode-clangd",
-                "xaver.clang-format"
+                "xaver.clang-format",
+                "mkhl.direnv"
             ]
         }
     }

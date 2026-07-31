@@ -1,0 +1,7 @@
+#!/bin/sh
+# Wraps clang for the kernel build: LLVM=1 always builds with clang here,
+# but this clang (pre-20) never consumes -fno-strict-overflow, and kbuild
+# promotes that to a hard error via -Werror=unused-command-line-argument.
+# Appending the suppression *last* beats kbuild's own -Werror, both for
+# real compiles and for its internal cc-option feature probes.
+exec clang "$@" -Wno-unused-command-line-argument

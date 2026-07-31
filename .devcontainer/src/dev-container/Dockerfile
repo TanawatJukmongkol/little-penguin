@@ -1,46 +1,37 @@
-FROM debian:bookworm-20251229-slim as dev-core
+# Lightweight Nix-based dev container: the actual kernel-build toolchain
+# (clang/lld, qemu, OVMF, etc.) is defined once in ../../../flake.nix.
+# flake.nix stays the single source of truth, but its closure is built
+# into this image below so containers start with the toolchain already
+# present instead of fetching/building it from scratch on first
+# `direnv allow`. direnv still does the runtime activation (via the
+# bind-mounted /ws), which is then instant since the store paths already
+# exist in the image.
+FROM nixos/nix:2.35.1
 
-# QEMU dependencies
-RUN apt-get update -y
-RUN apt-get install -y --no-install-recommends \
-    qemu-system-x86 qemu-utils qemu-kvm qemu-system-gui ovmf
+RUN mkdir -p /etc/nix \
+ && echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 
-# Essential dependencies
-RUN apt-get install -y \
-    openssl libssl-dev \
-    perl \
-    elfutils libdw-dev \
-    cpio xz-utils \
-    zlib1g zlib1g-dev \
-    rsync \
-    ncurses-bin libncurses-dev \
-    libelf1 libelf-dev \
-    python3 \
-    ccache
+# git and bash-interactive already ship in the base image's default profile.
+RUN nix profile install nixpkgs#direnv \
+ && ln -sf "$(command -v bash)" /bin/bash
 
-# kernel builds
-RUN apt-get install -y \
-    build-essential \
-    git make binutils bc bison flex \
-    util-linux
+RUN printf 'eval "$(direnv hook bash)"\n' >> /root/.bashrc
 
-# Install clang / tools
-RUN apt-get install -y \
-    llvm-16 clang-16 lld-16 \
-    clangd \
-    bear
+# The repo is bind-mounted from the host, so it's owned by the host user's
+# uid, not container root. Both git and the flake's libgit2-based fetcher
+# refuse to touch a repo they don't own unless it's allow-listed.
+RUN git config --global --add safe.directory /ws
 
-# Update cc to clang-16
-RUN update-alternatives --install /usr/bin/cc cc /usr/bin/clang-16 100 \
- && update-alternatives --set cc /usr/bin/clang-16
+# Bake the devShell's package closure into the image. flake.lock pins exact
+# versions, so as long as it doesn't change, the store paths built here are
+# byte-for-byte what direnv resolves at runtime from the bind-mounted /ws.
+COPY flake.nix flake.lock /opt/flake/
+RUN nix develop /opt/flake#default --command true
 
-# Fix linux's hardcoded paths
-RUN ln -f /usr/bin/clang-16        /usr/bin/clang \
- && ln -f /usr/bin/clang++-16      /usr/bin/clang++ \
- && ln -f /usr/bin/ld.lld-16       /usr/bin/ld.lld \
- && ln -f /usr/bin/llvm-ar-16      /usr/bin/llvm-ar \
- && ln -f /usr/bin/llvm-nm-16      /usr/bin/llvm-nm \
- && ln -f /usr/bin/llvm-objcopy-16 /usr/bin/llvm-objcopy \
- && ln -f /usr/bin/llvm-strip-16   /usr/bin/llvm-strip \
- && ln -f /usr/bin/llvm-readelf-16 /usr/bin/llvm-readelf \
- && ln -f /usr/bin/llvm-objdump-16 /usr/bin/llvm-objdump
+# direnv's allow-list is keyed on the .envrc's path plus a hash of its
+# content, not on the container filesystem, so approving it here still
+# holds once the bind mount swaps this placeholder for the real /ws (same
+# content, same hash). This means direnv works from a plain `docker compose
+# up` too, without depending on the devcontainer.json postCreateCommand.
+COPY .envrc /ws/.envrc
+RUN direnv allow /ws/.envrc

@@ -92,10 +92,6 @@ vm:
 	qemu-system-x86_64 \
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU)
 
-vm-img:
-	qemu-system-x86_64 \
-		$(BASE_QEMU) $(DEBUG_QEMU)
-
 vm-usb:
 	qemu-system-x86_64 \
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU) \
@@ -107,11 +103,6 @@ vm-usb:
 vm-gui:
 	qemu-system-x86_64 \
 		$(KERNEL_NORM) $(BASE_QEMU) \
-		-vga virtio
-
-vm-img-gui:
-	qemu-system-x86_64 \
-		$(BASE_QEMU) \
 		-vga virtio
 
 debug:

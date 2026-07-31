@@ -2,7 +2,7 @@
 # Settings
 NAME		= fourtytwo
 CC			= cc
-CFLAGS		= -Wall -Werror -Wextra -g -DDEBUG
+CFLAGS		= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-sign-compare -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
@@ -32,7 +32,7 @@ all: ../linux $(NAME).ko
 	make -C ..
 
 $(NAME).ko: $(SRCS) $(HEADERS)
-	make -C $(KERN_BUILD) \
+	bear -- make -C $(KERN_BUILD) \
 	M=$(shell pwd) CC=$(CC) $(MAKE_FLAGS) \
 	modules EXTRA_CFLAGS="$(CFLAGS)"
 

@@ -1,6 +1,5 @@
+#include <linux/err.h>
 #include "../include/debugfs.h"
-#include "asm-generic/errno-base.h"
-#include "linux/err.h"
 
 int init_debugfs(t_debug *dbg)
 {

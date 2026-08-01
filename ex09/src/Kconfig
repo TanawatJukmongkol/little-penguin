@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+config MYMOUNTS
+	tristate "Misc device mirroring /proc/mounts (mymounts)"
+	default m
+	help
+	  Expose the current mount namespace's mount table through a
+	  /dev/mymounts misc character device, similar to /proc/mounts.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called mymounts.

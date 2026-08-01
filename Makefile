@@ -35,7 +35,7 @@ linux:
 	ln -s linux/.clang-format .
 
 linux/.config: linux .clang-format
-	make -C linux defconfig
+	make -C linux ${MAKE_FLAGS} defconfig
 
 mrproper:
 	make -C linux mrproper

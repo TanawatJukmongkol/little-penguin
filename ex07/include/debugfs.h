@@ -7,9 +7,9 @@
 
 enum e_dbg_type
 {
+    DBG_END,
     DBG_DIR,
-    DBG_FILE,
-    DBG_END
+    DBG_FILE
 };
 
 typedef struct s_debug {
@@ -19,16 +19,18 @@ typedef struct s_debug {
     struct s_debug          *parent;
     int                     perm;
     enum e_dbg_type         type;
-
+    
     // directory
     struct s_debug          *entry;
-
+    
     // files
     struct file_operations  fops;
     int                     (*init_file)(struct s_debug *node);
+    int                     (*destruct)(struct s_debug *node);
 } t_debug;
 
 int init_debugfs(t_debug *dbg);
+int dest_debugfs(t_debug *dbg);
 
 int debug_foo_init(t_debug *dbg);
 int debug_id_init(t_debug *dbg);

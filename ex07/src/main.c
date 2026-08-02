@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 #include "../include/debugfs.h"
-#include "asm-generic/errno-base.h"
-#include "linux/fs.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("tjukmong");
+MODULE_DESCRIPTION("A simple debugfs driver.");
 
 static t_debug debugfs = (t_debug) {
 	.name = "fortytwo", .type = DBG_DIR,
@@ -25,7 +24,7 @@ static t_debug debugfs = (t_debug) {
 			.perm = 0644,
 			.init_file = debug_foo_init
 		},
-		{ .type = DBG_END }
+		{ }
 	}
 };
 
@@ -39,7 +38,7 @@ static int my_module_init(void)
 static void my_module_exit(void)
 {
 	pr_info("Cleaning up module.\n");
-	debugfs_remove(debugfs.root);
+	dest_debugfs(&debugfs);
 }
 
 module_init(my_module_init);

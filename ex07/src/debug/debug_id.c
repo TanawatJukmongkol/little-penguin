@@ -16,6 +16,7 @@ static int debug_id_release(struct inode *inode, struct file *filp);
 static ssize_t debug_id_read(struct file *filp, char __user *buf, size_t size, loff_t *f_pos);
 static ssize_t debug_id_write(struct file *filp, const char __user *buf, size_t size,
 			      loff_t *f_pos);
+static int    debug_id_destruct(t_debug *dbg);
 
 int debug_id_init(t_debug *dbg)
 {
@@ -23,7 +24,14 @@ int debug_id_init(t_debug *dbg)
 	dbg->fops.release = debug_id_release;
 	dbg->fops.read = debug_id_read;
 	dbg->fops.write = debug_id_write;
+	dbg->destruct = debug_id_destruct;
 	debug_fs_id = dbg;
+	return 0;
+}
+
+static int debug_id_destruct(t_debug *dbg)
+{
+	debug_fs_id = NULL;
 	return 0;
 }
 

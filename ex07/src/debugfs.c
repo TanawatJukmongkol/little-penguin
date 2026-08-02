@@ -42,3 +42,35 @@ int init_debugfs(t_debug *dbg)
 	}
 	return 0;
 }
+
+int dest_debugfs(t_debug *dbg)
+{
+	int error;
+
+	if (!dbg)
+		return -ENODEV;
+
+	switch (dbg->type) {
+	case DBG_DIR:
+		pr_info("debugfs: destroy entry \"%s\" {\n", dbg->name);
+		for (int i = 0; dbg->entry[i].type != DBG_END; i++) {
+			error = dest_debugfs(&dbg->entry[i]);
+			if (error != 0)
+				return error;
+		}
+		pr_info("}\n");
+		break;
+	case DBG_FILE:
+		pr_info("debugfs: file name: \"%s\"\n", dbg->name);
+		if (!dbg->destruct)
+			return 0;
+		error = dbg->destruct(dbg);
+		if (error != 0)
+			return error;
+		break;
+	default:
+		return -EINVAL;
+	}
+	debugfs_remove(dbg->root);
+	return 0;
+}

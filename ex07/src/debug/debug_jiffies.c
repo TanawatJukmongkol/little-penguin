@@ -3,13 +3,17 @@
 #include "linux/jiffies.h"
 
 static ssize_t debug_jiffies_read(struct file *filp, char __user *buf, size_t size, loff_t *f_pos);
-
-t_debug *debug_fs_jiffies;
+static int    debug_jiffies_destruct(t_debug *dbg);
 
 int debug_jiffies_init(t_debug *dbg)
 {
 	dbg->fops.read = debug_jiffies_read;
-	debug_fs_jiffies = dbg;
+	dbg->destruct = debug_jiffies_destruct;
+	return 0;
+}
+
+static int debug_jiffies_destruct(t_debug *dbg)
+{
 	return 0;
 }
 

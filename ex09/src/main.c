@@ -6,9 +6,8 @@
 #include "../include/mounts.h"
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Developer");
+MODULE_AUTHOR("tjukmong");
 MODULE_DESCRIPTION("A procfs entry mirroring /proc/mounts");
-MODULE_VERSION("1.0");
 
 /* File operations bound to the /proc/mymounts entry */
 static const struct proc_ops mymounts_fops = {

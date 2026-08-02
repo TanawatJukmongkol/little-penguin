@@ -1699,7 +1699,6 @@ CONFIG_INTEL_MEI_ME=y
 # CONFIG_UACCE is not set
 # CONFIG_PVPANIC is not set
 # CONFIG_KEBA_CP500 is not set
-CONFIG_MYMOUNTS=m
 # end of Misc devices
 
 #

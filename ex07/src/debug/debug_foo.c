@@ -7,20 +7,28 @@ static ssize_t debug_foo_read(struct file *filp, char __user *buf, size_t size,
 			      loff_t *f_pos);
 static ssize_t debug_foo_write(struct file *filp, const char __user *buf, size_t size,
 			       loff_t *f_pos);
+static int     debug_foo_destruct(t_debug *dbg);
 
 static char *buffer;
 static size_t buffer_len;
 static DEFINE_MUTEX(foo_lock);
-t_debug *debug_fs_foo;
 
 int debug_foo_init(t_debug *dbg)
 {
 	dbg->fops.read = debug_foo_read;
 	dbg->fops.write = debug_foo_write;
-	debug_fs_foo = dbg;
+	dbg->destruct = debug_foo_destruct;
 	buffer = kzalloc(PAGE_SIZE, GFP_KERNEL);
 	if (!buffer)
 		return -ENOMEM;
+	return 0;
+}
+
+static int debug_foo_destruct(t_debug *dbg)
+{
+	kfree(buffer);
+	buffer = NULL;
+	buffer_len = 0;
 	return 0;
 }
 

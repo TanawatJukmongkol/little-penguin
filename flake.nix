@@ -16,14 +16,11 @@
         # clang (pre-20, as used here via LLVM=1) never consumes
         # -fno-strict-overflow, and kbuild's top Makefile unconditionally
         # adds it, then promotes the resulting "unused argument" warning to
-        # a hard error via -Werror. This wraps `cc` itself instead of
-        # living as a path-relative script (the old ./cc-wrapper), so every
-        # Makefile in the repo (root and each exercise) can just say
-        # `CC = cc` and get the suppression, regardless of which directory
-        # make runs from.
-        ccWrapper = pkgs.writeShellScriptBin "cc" ''
-          exec ${pkgs.llvmPackages.clang}/bin/clang "$@" -Wno-unused-command-line-argument
-        '';
+        # a hard error via -Werror. tools/cc wraps `cc` with the
+        # suppression; putting it first on PATH means every Makefile in the
+        # repo (root and each exercise) can just say `CC = cc` and get it,
+        # regardless of which directory make runs from.
+        toolsDir = "${self}/tools";
       in {
         devShells.default = pkgs.mkShell.override {
           # The Makefile always builds with LLVM=1, which makes the kernel's
@@ -63,14 +60,13 @@
             qemu
             OVMF.fd
             gdb
-            ccWrapper
           ];
 
           shellHook = ''
             export OVMF_PATH="${pkgs.OVMF.fd}/FV/OVMF.fd"
             # Must win over the stdenv's own `cc` (plain clang, no
             # suppression) and over llvmPackages.clang's `cc` symlink.
-            export PATH="${ccWrapper}/bin:$PATH"
+            export PATH="${toolsDir}:$PATH"
           '';
         };
       });

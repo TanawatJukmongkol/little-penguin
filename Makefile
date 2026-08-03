@@ -2,11 +2,6 @@
 BAK_CFG		= ex00/config
 CC			= cc
 
-# tools/cc wraps clang: putting it first on PATH gets bare-host (non-nix)
-# builds the same -fno-strict-overflow suppression that flake.nix's devShell
-# already provides via its own PATH-prepended cc.
-export PATH := $(CURDIR)/tools:$(PATH)
-
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 
 # ld.lld (LLVM=1's default linker) corrupts the x86 real-mode trampoline's
@@ -43,7 +38,7 @@ linux/.config: linux .clang-format
 	make -C linux ${MAKE_FLAGS} defconfig
 
 mrproper:
-	make -C linux mrproper
+	make CC=${CC} ${MAKE_FLAGS} -C linux mrproper
 	cp $(BAK_CFG) linux/.config
 
 config: linux/.config

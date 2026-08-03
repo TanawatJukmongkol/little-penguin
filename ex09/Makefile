@@ -2,6 +2,10 @@
 # Settings
 NAME		= mymounts
 CC			= cc
+
+# ../tools/cc wraps clang with the -fno-strict-overflow suppression flake.nix's
+# devShell already provides on PATH; this puts it there for bare-host builds too.
+export PATH := $(abspath ../tools):$(PATH)
 CFLAGS		= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-sign-compare -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 # LLVM=1/LD=ld/ARCH=x86_64 mirror ../Makefile: this tree only has clang

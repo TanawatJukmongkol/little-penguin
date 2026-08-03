@@ -1,0 +1,21 @@
+# Grants the plugdev group RW access to USB HID boot-protocol keyboards
+# (class 03, subclass 01, protocol 01 -- the same match used by
+# ex04/10-keyboard.rules) so `make vm-usb` can pass them through to QEMU
+# without root. Matches by interface class rather than a specific
+# vendor/product ID, so it applies to any keyboard on any host.
+#
+# Install (non-NixOS):
+#   sudo cp 99-qemu-usb-keyboard.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger --subsystem-match=usb
+#
+# NixOS: don't copy this file in directly -- /etc/udev/rules.d is managed
+# by the system module and won't survive a rebuild. Instead add the rule
+# to your system configuration:
+#
+#   services.udev.extraRules = ''
+#     SUBSYSTEM=="usb", ENV{ID_USB_INTERFACES}=="*:030101:*", GROUP="plugdev", MODE="0660"
+#   '';
+#
+# then `sudo nixos-rebuild switch`.
+SUBSYSTEM=="usb", ENV{ID_USB_INTERFACES}=="*:030101:*", GROUP="plugdev", MODE="0660"

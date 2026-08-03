@@ -2,6 +2,11 @@
 BAK_CFG		= ex00/config
 CC			= cc
 
+# tools/cc wraps clang: putting it first on PATH gets bare-host (non-nix)
+# builds the same -fno-strict-overflow suppression that flake.nix's devShell
+# already provides via its own PATH-prepended cc.
+export PATH := $(CURDIR)/tools:$(PATH)
+
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 
 # ld.lld (LLVM=1's default linker) corrupts the x86 real-mode trampoline's
@@ -92,13 +97,26 @@ vm:
 	qemu-system-x86_64 \
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU)
 
+# hostbus/hostport identify a physical USB port, which differs on every
+# machine. Passthrough is matched by vendorid:productid instead, discovered
+# via find-usb-keyboards.sh (or overridden with USB_DEV="vid:pid ..."), so
+# this works regardless of the host.
 vm-usb:
+	@devs="$(USB_DEV)"; \
+	[ -n "$$devs" ] || devs=$$(find-usb-keyboards.sh); \
+	if [ -z "$$devs" ]; then \
+		echo "vm-usb: no USB boot-protocol keyboard detected."; \
+		echo "        Plug one in, or override with: make vm-usb USB_DEV=\"vid:pid ...\""; \
+		exit 1; \
+	fi; \
+	args=""; \
+	for vp in $$devs; do \
+		args="$$args -device usb-host,vendorid=0x$${vp%%:*},productid=0x$${vp##*:},bus=uhci.0"; \
+	done; \
+	echo "vm-usb: passing through $$devs"; \
 	qemu-system-x86_64 \
 		$(KERNEL_DEBUG) $(BASE_QEMU) $(DEBUG_QEMU) \
-		-usb \
-		-device piix3-usb-uhci,id=uhci \
-		-device usb-host,hostbus=1,hostport=2,bus=uhci.0 \
-		-device usb-host,hostbus=1,hostport=1,bus=uhci.0
+		-usb -device piix3-usb-uhci,id=uhci $$args
 
 vm-gui:
 	qemu-system-x86_64 \

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 #include "../include/main.h"
 
-static struct task_struct *rm_thread;
 static int devices = 0;
+static char *envp[] = { "DRIVER_UNLOAD=1", NULL };
 
 // printk(KERN_INFO
 //        "keyboard_driver: num=%d class=%d subclass=%d proto=%d\n",
@@ -10,21 +10,6 @@ static int devices = 0;
 //        intf->cur_altsetting->desc.bInterfaceClass,
 //        intf->cur_altsetting->desc.bInterfaceSubClass,
 //        intf->cur_altsetting->desc.bInterfaceProtocol);
-
-static int self_rm_fn(void *data)
-{
-	ssleep(1);
-
-	printk(KERN_INFO "Attempting self-unload via rmmod\n");
-
-	char *argv[] = { "/sbin/rmmod", THIS_MODULE->name, NULL };
-	static char *envp[] = { "HOME=/", "PATH=/sbin:/bin:/usr/sbin:/usr/bin",
-				NULL };
-
-	call_usermodehelper(argv[0], argv, envp, UMH_WAIT_EXEC);
-
-	return 0;
-}
 
 int usb_probe(struct usb_interface *intf, const struct usb_device_id *id)
 {
@@ -57,5 +42,5 @@ void usb_disconnect(struct usb_interface *intf)
 	usb_set_intfdata(intf, NULL);
 	kfree(info);
 	if (--devices == 0)
-		rm_thread = kthread_run(self_rm_fn, NULL, "self_rm_thread");
+		kobject_uevent_env(&intf->dev.kobj, KOBJ_CHANGE, envp);
 }

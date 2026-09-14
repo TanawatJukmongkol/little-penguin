@@ -1,5 +1,6 @@
 /.direnv
 /linux
+/linux-next
 /img
 /ft_linux
 .clang-format

@@ -1,6 +1,7 @@
-
-BAK_CFG		= ex00/config
+LINUX_SRC	?= linux
 CC			= cc
+BAK_CFG		= ex00/config
+PROJECTS	= ex01 ex03 ex04 ex05 ex07 ex08 ex09
 
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 
@@ -10,45 +11,66 @@ BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 # 0.2s of boot, every time, on every clang version tested. Forcing bfd `ld`
 # for the link step (keeping clang for compilation) avoids it entirely.
 
-MAKE_FLAGS	= \
+MAKE_FLAGS  = \
 	LLVM=1 \
 	LD=ld \
 	ARCH=x86_64 \
+	HOSTCC=clang \
+	HOSTCXX=clang++ \
 	-j$(BUILD_JOBS) -l$(shell nproc)
 
 VM_DISK		= ft_linux/lfs.qcow2
+
 ROOT_PART	= /dev/sda4
 
 # Overridden by the flake's shellHook when running inside `nix develop`;
 # falls back to the Debian ovmf package path for bare-host use.
 OVMF_PATH	?= /usr/share/ovmf/OVMF.fd
 
-all: linux build
+all: linux mrproper build
 
 # Latest as of project start. ("5 weeks ago")
 
 linux:
-	git clone --depth 1 --branch v6.14 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-	cp ex00/config linux/.config
+	@if [ ! -d "$(LINUX_SRC)" ]; then \
+		echo "Cloning Linux v6.14 into $(LINUX_SRC)..."; \
+		git clone --depth 1 --branch v6.14 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git "$(LINUX_SRC)"; \
+	fi
+	@if [ ! -f "$(LINUX_SRC)/.config" ]; then \
+		cp ex00/config "$(LINUX_SRC)/.config"; \
+	fi
 
 .clang-format:
-	ln -s linux/.clang-format .
+	ln -s $(LINUX_SRC)/.clang-format .
 
-linux/.config: linux .clang-format
-	make -C linux ${MAKE_FLAGS} defconfig
+$(LINUX_SRC)/.config: linux .clang-format
+	make -C $(LINUX_SRC) $(MAKE_FLAGS) defconfig
+
+savecfg:
+	cp $(LINUX_SRC)/.config $(BAK_CFG)
 
 mrproper:
-	make CC=${CC} ${MAKE_FLAGS} -C linux mrproper
-	cp $(BAK_CFG) linux/.config
+	make CC=$(CC) $(MAKE_FLAGS) -C $(LINUX_SRC) mrproper
+	cp $(BAK_CFG) $(LINUX_SRC)/.config
 
-config: linux/.config
-	make -C linux ${MAKE_FLAGS} menuconfig
-	cp linux/.config ${BAK_CFG}
+config: $(LINUX_SRC)/.config
+	make -C $(LINUX_SRC) $(MAKE_FLAGS) menuconfig
+	cp $(LINUX_SRC)/.config $(BAK_CFG)
 
 build:
-	make CC=${CC} ${MAKE_FLAGS} -C linux
+	make CC=$(CC) $(MAKE_FLAGS) -C $(LINUX_SRC)
 
-re: mrproper all
+driver:
+	for folder in $(PROJECTS); do \
+		$(MAKE) --no-print-directory -C $$folder; \
+	done
+
+clean:
+	for folder in $(PROJECTS); do \
+		$(MAKE) --no-print-directory -C $$folder clean; \
+	done
+
+re: clean all
 
 # WARNING! Experimental.
 # TODO: Fully debuggable environment without the use of previous LFS image.
@@ -77,16 +99,16 @@ KERN_FLAGS_DEBUG = $(KERN_FLAGS) \
 		nokaslr
 
 KERNEL_NORM = \
-		-kernel ./linux/arch/x86_64/boot/bzImage \
-		-append "$(KERN_FLAGS)"
+	-kernel ./$(LINUX_SRC)/arch/x86_64/boot/bzImage \
+	-append "$(KERN_FLAGS)"
 
 DEBUG_QEMU = \
-		-gdb tcp::1122 \
-		-nographic
+	-gdb tcp::1122 \
+	-nographic
 
 KERNEL_DEBUG = \
-		-kernel ./linux/arch/x86_64/boot/bzImage \
-		-append "$(KERN_FLAGS_DEBUG)"
+	-kernel ./$(LINUX_SRC)/arch/x86_64/boot/bzImage \
+	-append "$(KERN_FLAGS_DEBUG)"
 
 vm:
 	qemu-system-x86_64 \
@@ -119,6 +141,6 @@ vm-gui:
 		-vga virtio
 
 debug:
-	gdb linux/vmlinux -tui
+	gdb $(LINUX_SRC)/vmlinux -tui
 
-.PHONY: mrproper config build install vm vm-usb vm-usb-disabled
+.PHONY: savecfg mrproper config build driver clean re install vm vm-usb vm-usb-disabled

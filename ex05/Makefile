@@ -8,7 +8,7 @@ MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
 KERN_VERSION	= $(shell uname -r)
-KERN_BUILD		= ../linux
+KERN_BUILD		?= ../linux
 
 # Source files
 SRCS		= $(addprefix src/, \
@@ -26,10 +26,7 @@ $(NAME)-y	+= $(SRCS:.c=.o)
 ccflags-y	+= $(CFLAGS)
 obj-m		+= $(NAME).o
 
-all: ../linux $(NAME).ko
-
-../linux:
-	make -C ..
+all: $(NAME).ko
 
 $(NAME).ko: $(SRCS) $(HEADERS)
 	bear -- make -C $(KERN_BUILD) \
@@ -42,7 +39,7 @@ clean:
 	$(MAKE_FLAGS) clean
 
 format: all
-	../linux/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
+	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
 install-rules:
 	sudo cp 99-fourtytwo.rules /etc/udev/rules.d/99-fourtytwo.rules
@@ -56,4 +53,4 @@ reinstall-rules: uninstall-rules install-rules
 
 re: clean all
 
-.PHONY: all clean format re install-rules uninstall-rules
+.PHONY: all $(NAME).ko clean format re install-rules uninstall-rules

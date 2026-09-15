@@ -12,7 +12,7 @@ MAKE_FLAGS	= LLVM=1 LD=ld ARCH=x86_64 -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
 KERN_VERSION	= $(shell uname -r)
-KERN_BUILD		= ../linux
+KERN_BUILD		?= ../linux
 
 # In-tree location: rather than the M= out-of-tree module build used by
 # the other exercises, this driver's src/ is symlinked straight into the
@@ -37,12 +37,9 @@ HEADERS		= $(addprefix include/, \
 # Built-in code has no standalone .ko artifact - it's only produced by
 # building the kernel image itself, so `all` just runs the normal
 # top-level kbuild target instead of targeting a module path.
-all: ../linux $(SRCS) $(HEADERS) config
+all: $(SRCS) $(HEADERS) config
 	bear -- make -C $(KERN_BUILD) \
 	CC=$(CC) SRCS="$(SRCS)" $(MAKE_FLAGS)
-
-../linux:
-	make -C ..
 
 # Symlink the driver's source directory into the kernel tree so KBUILD
 # discovers it as drivers/misc/mymounts.
@@ -78,7 +75,7 @@ clean: unhook
 	make -C $(KERN_BUILD) $(MAKE_FLAGS) clean
 
 format: all
-	../linux/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
+	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
 re: clean all
 

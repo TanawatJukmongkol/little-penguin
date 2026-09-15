@@ -8,7 +8,7 @@ MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
 KERN_VERSION	= $(shell uname -r)
-KERN_BUILD		= ../linux
+KERN_BUILD		?= ../linux
 
 # Source files
 SRCS		= $(addprefix src/, \
@@ -25,10 +25,7 @@ $(NAME)-y	+= $(SRCS:.c=.o)
 ccflags-y	+= $(CFLAGS)
 obj-m		+= $(NAME).o
 
-all: ../linux $(NAME).ko Makefile
-
-../linux:
-	make -C ..
+all: $(NAME).ko Makefile
 
 $(NAME).ko: $(SRCS) $(HEADERS)
 	bear -- make -C $(KERN_BUILD) \
@@ -41,7 +38,7 @@ clean:
 	$(MAKE_FLAGS) clean
 
 format: all
-	../linux/scripts/checkpatch.pl -strict -no-tree -file $(SRCS) $(HEADERS)
+	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -file $(SRCS) $(HEADERS)
 
 re: clean all
 
@@ -60,4 +57,4 @@ uninstall-rules:
 
 reinstall-rules: uninstall-rules install-rules
 
-.PHONY: all clean format re install-rules uninstall-rules reinstall-rules
+.PHONY: all $(NAME).ko clean format re install-rules uninstall-rules reinstall-rules

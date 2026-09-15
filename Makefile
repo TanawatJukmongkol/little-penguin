@@ -1,4 +1,4 @@
-LINUX_SRC	?= linux
+KERN_BUILD	?= linux
 CC			= cc
 BAK_CFG		= ex00/config
 PROJECTS	= ex01 ex03 ex04 ex05 ex07 ex08 ex09
@@ -32,37 +32,37 @@ all: linux mrproper build
 # Latest as of project start. ("5 weeks ago")
 
 linux:
-	@if [ ! -d "$(LINUX_SRC)" ]; then \
-		echo "Cloning Linux v6.14 into $(LINUX_SRC)..."; \
-		git clone --depth 1 --branch v6.14 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git "$(LINUX_SRC)"; \
+	@if [ ! -d "$(KERN_BUILD)" ]; then \
+		echo "Cloning Linux v6.14 into $(KERN_BUILD)..."; \
+		git clone --depth 1 --branch v6.14 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git "$(KERN_BUILD)"; \
 	fi
-	@if [ ! -f "$(LINUX_SRC)/.config" ]; then \
-		cp ex00/config "$(LINUX_SRC)/.config"; \
+	@if [ ! -f "$(KERN_BUILD)/.config" ]; then \
+		cp ex00/config "$(KERN_BUILD)/.config"; \
 	fi
 
 .clang-format:
-	ln -s $(LINUX_SRC)/.clang-format .
+	ln -s $(KERN_BUILD)/.clang-format .
 
-$(LINUX_SRC)/.config: linux .clang-format
-	make -C $(LINUX_SRC) $(MAKE_FLAGS) defconfig
+$(KERN_BUILD)/.config: linux .clang-format
+	make -C $(KERN_BUILD) $(MAKE_FLAGS) defconfig
 
 savecfg:
-	cp $(LINUX_SRC)/.config $(BAK_CFG)
+	cp $(KERN_BUILD)/.config $(BAK_CFG)
 
 mrproper:
-	make CC=$(CC) $(MAKE_FLAGS) -C $(LINUX_SRC) mrproper
-	cp $(BAK_CFG) $(LINUX_SRC)/.config
+	make CC=$(CC) $(MAKE_FLAGS) -C $(KERN_BUILD) mrproper
+	cp $(BAK_CFG) $(KERN_BUILD)/.config
 
-config: $(LINUX_SRC)/.config
-	make -C $(LINUX_SRC) $(MAKE_FLAGS) menuconfig
-	cp $(LINUX_SRC)/.config $(BAK_CFG)
+config: $(KERN_BUILD)/.config
+	make -C $(KERN_BUILD) $(MAKE_FLAGS) menuconfig
+	cp $(KERN_BUILD)/.config $(BAK_CFG)
 
 build:
-	make CC=$(CC) $(MAKE_FLAGS) -C $(LINUX_SRC)
+	KERN_BUILD=${KERN_BUILD} make CC=$(CC) $(MAKE_FLAGS) -C $(KERN_BUILD)
 
 driver:
 	for folder in $(PROJECTS); do \
-		$(MAKE) --no-print-directory -C $$folder; \
+		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder; \
 	done
 
 clean:
@@ -99,7 +99,7 @@ KERN_FLAGS_DEBUG = $(KERN_FLAGS) \
 		nokaslr
 
 KERNEL_NORM = \
-	-kernel ./$(LINUX_SRC)/arch/x86_64/boot/bzImage \
+	-kernel ./$(KERN_BUILD)/arch/x86_64/boot/bzImage \
 	-append "$(KERN_FLAGS)"
 
 DEBUG_QEMU = \
@@ -107,7 +107,7 @@ DEBUG_QEMU = \
 	-nographic
 
 KERNEL_DEBUG = \
-	-kernel ./$(LINUX_SRC)/arch/x86_64/boot/bzImage \
+	-kernel ./$(KERN_BUILD)/arch/x86_64/boot/bzImage \
 	-append "$(KERN_FLAGS_DEBUG)"
 
 vm:
@@ -141,6 +141,6 @@ vm-gui:
 		-vga virtio
 
 debug:
-	gdb $(LINUX_SRC)/vmlinux -tui
+	gdb $(KERN_BUILD)/vmlinux -tui
 
 .PHONY: savecfg mrproper config build driver clean re install vm vm-usb vm-usb-disabled

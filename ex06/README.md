@@ -26,3 +26,6 @@ git send-email \
   0001-fs-buffer-fix-NULL-deref-on-folio-less-bh-in-__bh_submit.patch
 ```
 
+# LKML Archive:
+https://lore.kernel.org/lkml/20260915202534.468958-1-tanawat.jukmon@gmail.com/
+

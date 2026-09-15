@@ -1,0 +1,40 @@
+From: Tanawat Jukmongkol <tanawat.jukmon@gmail.com>
+Date: Tue Sep 15 18:58:44 2026 +0700
+Subject: [PATCH] fs/buffer: fix NULL deref on folio-less bh in __bh_submit
+
+jbd2 submits buffer_heads it allocates directly for journal descriptor
+and commit-record blocks, which have no folio backing at all - as the
+comment on buffer_set_crypto_ctx() just above already notes. Unlike
+that check, and unlike the bh->b_folio check further down in the same
+function, __bh_submit() calls folio_test_dropbehind(bh->b_folio)
+unconditionally, so committing a transaction on one of these bh's
+null-derefs while reading the folio's flags:
+
+  BUG: kernel NULL pointer dereference, address: 0000000000000000
+  RIP: __bh_submit+0x90/0x140
+  Call Trace:
+   jbd2_journal_commit_transaction
+   kjournald2
+   kthread
+
+Guard the call the same way.
+
+Fixes: a2c924c240e7 ("buffer: set BIO_COMPLETE_IN_TASK for dropbehind writeback")
+Signed-off-by: Tanawat Jukmongkol <tanawat.jukmon@gmail.com>
+---
+ fs/buffer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/buffer.c b/fs/buffer.c
+index 427d8a817..4aea0bb08 100644
+--- a/fs/buffer.c
++++ b/fs/buffer.c
+@@ -1106,7 +1106,7 @@ static void __bh_submit(struct buffer_head *bh, blk_opf_t opf,
+
+ 	bio = bio_alloc(bh->b_bdev, 1, opf, GFP_NOIO);
+
+-	if (folio_test_dropbehind(bh->b_folio) && op_is_write(opf))
++	if (bh->b_folio && folio_test_dropbehind(bh->b_folio) && op_is_write(opf))
+ 		bio_set_flag(bio, BIO_COMPLETE_IN_TASK);
+
+ 	if (IS_ENABLED(CONFIG_FS_ENCRYPTION))

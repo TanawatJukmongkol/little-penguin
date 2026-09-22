@@ -44,7 +44,7 @@ all: $(SRCS) $(HEADERS) config
 # Symlink the driver's source directory into the kernel tree so KBUILD
 # discovers it as drivers/misc/mymounts.
 $(TREE_DIR):
-	ln -s $(abspath src) $(TREE_DIR)
+	@- ln -s $(abspath src) $(TREE_DIR)
 
 # Register the driver with the surrounding Kconfig/Makefile. Idempotent,
 # since a fresh `make linux` clone regenerates drivers/misc/{Kconfig,Makefile}

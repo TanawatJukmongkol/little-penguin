@@ -26,9 +26,9 @@ int usb_probe(struct usb_interface *intf, const struct usb_device_id *id)
 				  info->product, sizeof(info->product));
 	info->product[dev_name_len] = '\0';
 	usb_set_intfdata(intf, info);
-	pr_info("keyboard_driver: %s [%04x:%04x] connected.\n", info->product,
-		udev->descriptor.idVendor, udev->descriptor.idProduct);
 	devices++;
+	pr_info("keyboard_driver: +%s [%04x:%04x] (%d connected).\n", info->product,
+		udev->descriptor.idVendor, udev->descriptor.idProduct, devices);
 	return 0;
 }
 // RN_INFO "keyboard_driver: remove interface: %d\n",

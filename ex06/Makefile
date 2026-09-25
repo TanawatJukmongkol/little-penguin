@@ -19,19 +19,33 @@ $(FULL_SRC_PATH):
 		$(FULL_SRC_PATH)
 	cd $(FULL_SRC_PATH) && git fetch --tags
 
-# Idempotent: skip patches that are already applied (patch-r: not applied),
-# instead of patch(1) stopping to ask about a "reversed" patch.
+GIT_TREE	= git -C $(FULL_SRC_PATH)
+PATCH_ID	= git patch-id --stable | cut -d' ' -f1
+
+# Commit the patches (git am) instead of leaving them as working-tree changes,
+# so the version string doesn't get "-dirty". Idempotent: already-committed
+# patches are skipped, and an uncommitted copy is taken out before committing.
 patch: linux
 	for p in $(PATCHES); do \
-		if ! patch -R -p1 -s -f --dry-run -d $(FULL_SRC_PATH) < $$p >/dev/null; then \
-			patch -p1 -d $(FULL_SRC_PATH) < $$p || exit 1; \
+		id=$$(cat $$p | $(PATCH_ID)); \
+		files=$$($(GIT_TREE) apply --numstat $(CURDIR)/$$p | cut -f3); \
+		$(GIT_TREE) log --no-merges -n 5 -p -- $$files | $(PATCH_ID) | grep -qx "$$id" && continue; \
+		if $(GIT_TREE) apply -R --check $(CURDIR)/$$p 2>/dev/null; then \
+			$(GIT_TREE) apply -R $(CURDIR)/$$p || exit 1; \
 		fi; \
+		$(GIT_TREE) am $(CURDIR)/$$p || exit 1; \
 	done
 
+# Drop the patch commit again (only when it's the top commit; --keep leaves
+# other local changes alone), or reverse an uncommitted copy.
 patch-r: linux
 	for p in $(PATCHES); do \
-		if patch -R -p1 -s -f --dry-run -d $(FULL_SRC_PATH) < $$p >/dev/null; then \
-			patch -R -p1 -d $(FULL_SRC_PATH) < $$p || exit 1; \
+		id=$$(cat $$p | $(PATCH_ID)); \
+		files=$$($(GIT_TREE) apply --numstat $(CURDIR)/$$p | cut -f3); \
+		if [ "$$($(GIT_TREE) show HEAD -- $$files | $(PATCH_ID))" = "$$id" ]; then \
+			$(GIT_TREE) reset --keep HEAD~1 || exit 1; \
+		elif $(GIT_TREE) apply -R --check $(CURDIR)/$$p 2>/dev/null; then \
+			$(GIT_TREE) apply -R $(CURDIR)/$$p || exit 1; \
 		fi; \
 	done
 

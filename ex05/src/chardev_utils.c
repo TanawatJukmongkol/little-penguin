@@ -38,10 +38,10 @@ int unregister_char_device(struct s_chrdev *dev)
 	pr_info("fortytwo: misc device '%s' unregistered\n",
 		dev->name ? dev->name : "unknown");
 
-	*dev = CHARDEV(NULL);
-
 	mutex_unlock(&dev->mutex);
 	mutex_destroy(&dev->mutex);
+
+	*dev = CHARDEV(NULL);
 
 	return 0;
 }

@@ -1,0 +1,1 @@
+KERNEL=="fortytwo", GROUP="dialout", MODE="0660"

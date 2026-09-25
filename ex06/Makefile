@@ -9,7 +9,7 @@ BUILD_JOBS	?= $(shell expr $(shell nproc) \* 3 / 2)
 
 PATCHES		= 0001-fs-buffer-fix-NULL-deref-on-folio-less-bh-in-__bh_submit.patch
 
-all: linux mrproper patch build log
+all: linux patch build log
 
 # linux-next isn't the root's v6.14 tag, so clone it here first; the root
 # `linux` rule then only seeds .config.
@@ -19,14 +19,20 @@ $(FULL_SRC_PATH):
 		$(FULL_SRC_PATH)
 	cd $(FULL_SRC_PATH) && git fetch --tags
 
+# Idempotent: skip patches that are already applied (patch-r: not applied),
+# instead of patch(1) stopping to ask about a "reversed" patch.
 patch: linux
 	for p in $(PATCHES); do \
-		patch -p1 -d $(FULL_SRC_PATH) < $$p; \
+		if ! patch -R -p1 -s -f --dry-run -d $(FULL_SRC_PATH) < $$p >/dev/null; then \
+			patch -p1 -d $(FULL_SRC_PATH) < $$p || exit 1; \
+		fi; \
 	done
 
 patch-r: linux
 	for p in $(PATCHES); do \
-		patch -R -p1 -d $(FULL_SRC_PATH) < $$p; \
+		if patch -R -p1 -s -f --dry-run -d $(FULL_SRC_PATH) < $$p >/dev/null; then \
+			patch -R -p1 -d $(FULL_SRC_PATH) < $$p || exit 1; \
+		fi; \
 	done
 
 linux: $(FULL_SRC_PATH)

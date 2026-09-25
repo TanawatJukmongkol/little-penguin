@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 #include "../include/main.h"
 
-static int devices = 0;
+static int devices;
 static char *envp[] = { "DRIVER_UNLOAD=1", NULL };
 
 // printk(KERN_INFO
@@ -31,6 +31,7 @@ int usb_probe(struct usb_interface *intf, const struct usb_device_id *id)
 		udev->descriptor.idVendor, udev->descriptor.idProduct, devices);
 	return 0;
 }
+
 // RN_INFO "keyboard_driver: remove interface: %d\n",
 //        intf->cur_altsetting->desc.bInterfaceNumber);
 

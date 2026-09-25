@@ -5,16 +5,13 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("tjukmong");
 
-int my_module_init(void);
-void my_module_exit(void);
-
-int my_module_init(void)
+static int __init my_module_init(void)
 {
 	pr_info("Hello world!\n");
 	return 0;
 }
 
-void my_module_exit(void)
+static void __exit my_module_exit(void)
 {
 	pr_info("Cleaning up module.\n");
 }

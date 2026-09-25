@@ -9,27 +9,31 @@ static const size_t EXPECTED_LEN = sizeof(EXPECTED_STRING) - 1;
 static DEFINE_MUTEX(id_mutex);
 static int id_open;
 
-t_debug *debug_fs_id;
+struct s_debug *debug_fs_id;
 
 static int debug_id_open(struct inode *inode, struct file *filp);
 static int debug_id_release(struct inode *inode, struct file *filp);
 static ssize_t debug_id_read(struct file *filp, char __user *buf, size_t size, loff_t *f_pos);
 static ssize_t debug_id_write(struct file *filp, const char __user *buf, size_t size,
 			      loff_t *f_pos);
-static int    debug_id_destruct(t_debug *dbg);
+static int    debug_id_destruct(struct s_debug *dbg);
 
-int debug_id_init(t_debug *dbg)
+static const struct file_operations debug_id_fops = {
+	.open = debug_id_open,
+	.release = debug_id_release,
+	.read = debug_id_read,
+	.write = debug_id_write,
+};
+
+int debug_id_init(struct s_debug *dbg)
 {
-	dbg->fops.open = debug_id_open;
-	dbg->fops.release = debug_id_release;
-	dbg->fops.read = debug_id_read;
-	dbg->fops.write = debug_id_write;
+	dbg->fops = &debug_id_fops;
 	dbg->destruct = debug_id_destruct;
 	debug_fs_id = dbg;
 	return 0;
 }
 
-static int debug_id_destruct(t_debug *dbg)
+static int debug_id_destruct(struct s_debug *dbg)
 {
 	debug_fs_id = NULL;
 	return 0;

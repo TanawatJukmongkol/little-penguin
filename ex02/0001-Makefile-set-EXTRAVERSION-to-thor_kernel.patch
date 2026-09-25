@@ -1,0 +1,30 @@
+From 17457f5c33a9e63cad1e0a9ab1ac5603a51cf8e3 Mon Sep 17 00:00:00 2001
+From: Tanawat Jukmongkol <tanawat.jukmon@gmail.com>
+Date: Mon, 28 Apr 2025 05:13:05 +0700
+Subject: [PATCH] Makefile: set EXTRAVERSION to -thor_kernel
+
+Set EXTRAVERSION so that the kernel built from this tree reports
+"-thor_kernel" in its version string (uname -r, /proc/version and the
+boot log banner).
+
+Signed-off-by: Tanawat Jukmongkol <tanawat.jukmon@gmail.com>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 8b6764d..ff8d0fe 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 6
+ PATCHLEVEL = 14
+ SUBLEVEL = 0
+-EXTRAVERSION =
++EXTRAVERSION = -thor_kernel
+ NAME = Baby Opossum Posse
+ 
+ # *DOCUMENTATION*
+-- 
+2.47.2
+

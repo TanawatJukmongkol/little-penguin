@@ -1,6 +1,6 @@
 
 # Settings
-NAME		= fourtytwo
+NAME		= fortytwo
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-sign-compare -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
@@ -42,11 +42,11 @@ format: all
 	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
 install-rules:
-	sudo cp 99-fourtytwo.rules /etc/udev/rules.d/99-fourtytwo.rules
+	sudo cp 99-fortytwo.rules /etc/udev/rules.d/99-fortytwo.rules
 	sudo udevadm control --reload-rules && sudo udevadm trigger
 
 uninstall-rules:
-	sudo rm -f /etc/udev/rules.d/99-fourtytwo.rules
+	sudo rm -f /etc/udev/rules.d/99-fortytwo.rules
 	sudo udevadm control --reload-rules && sudo udevadm trigger
 
 reinstall-rules: uninstall-rules install-rules

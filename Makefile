@@ -58,19 +58,24 @@ VIDEO_DEVICE = <!-- Headless Mode emulated video card dropped -->
 LOG ?= $(PWD)/kernel.log
 # Seconds to wait for the guest to power itself off before pulling the plug.
 BOOT_TIMEOUT ?= 180
-# Boot straight into poweroff.target: systemd runs a full boot, then shuts
-# down cleanly on its own. ignore_loglevel puts every kernel message on the
-# serial console, and panic=-1 turns a panic into a reboot, which the domain
-# (on_reboot=destroy) treats as a shutdown instead of hanging forever.
-# TERM=dumb is handed to init, so systemd prints its status without colors.
+# Command run once the guest has booted; its output lands in the log.
+LOG_RUN ?= /bin/uname -a
+# systemd.run (systemd-run-generator) boots, runs $(LOG_RUN) with its output
+# on the console, then powers off cleanly either way. ignore_loglevel puts
+# every kernel message on the serial console, and panic=-1 turns a panic into
+# a reboot, which the domain (on_reboot=destroy) treats as a shutdown instead
+# of hanging forever. TERM=dumb is handed to init, so systemd prints its
+# status without colors.
 LOG_CMDLINE ?= root=$(ROOT_PART) console=ttyS0 nokaslr ignore_loglevel \
-               panic=-1 systemd.unit=poweroff.target TERM=dumb
+               panic=-1 TERM=dumb systemd.run="$(LOG_RUN)" \
+               systemd.run_success_action=poweroff \
+               systemd.run_failure_action=poweroff
 SERIAL_FILTER = $(if $(SERIAL_LOG), \
 	sed -e 's|<serial type="pty">|<serial type="file"><source path="$(SERIAL_LOG)" append="off"/>|' \
 	    -e '/<console type="pty">/d', \
 	cat)
 
-all: linux mrproper build
+all: linux build
 
 # Latest as of project start. ("5 weeks ago")
 
@@ -113,6 +118,11 @@ clean:
 		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder clean; \
 	done
 
+format:
+	for folder in $(PROJECTS); do \
+		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder format; \
+	done
+
 re: clean all
 
 vm: vm-clean vm-xml-boot
@@ -132,7 +142,7 @@ vm-xml-boot:
 	@echo "Interpolating variables via envsubst and defining domain profile..."
 	@VM_NAME="$(VM_NAME)" \
 	 KERNEL_IMG="$(KERNEL_IMG)" \
-	 CMDLINE="$(CMDLINE)" \
+	 CMDLINE='$(CMDLINE)' \
 	 VM_DISK_ABS="$(VM_DISK_ABS)" \
 	 PWD="$(PWD)" \
 	 OVMF_PATH="$(OVMF_PATH)" \
@@ -160,7 +170,7 @@ debug:
 # Boot $(KERN_BUILD) headless, save the serial console to $(LOG), and wait
 # for the guest to shut itself down.
 log:
-	@$(MAKE) --no-print-directory vm CMDLINE="$(LOG_CMDLINE)" SERIAL_LOG="$(LOG)"
+	@$(MAKE) --no-print-directory vm CMDLINE='$(LOG_CMDLINE)' SERIAL_LOG="$(LOG)"
 	@echo "Booting, serial console -> $(LOG) (timeout $(BOOT_TIMEOUT)s)..."
 	@for i in $$(seq $(BOOT_TIMEOUT)); do \
 		[ "$$(virsh --connect qemu:///session domstate $(VM_NAME) 2>/dev/null)" = "shut off" ] && break; \
@@ -173,5 +183,5 @@ log:
 	@echo "Boot log saved to $(LOG)"
 
 .PHONY: all linux savecfg mrproper config \
-        build driver clean re debug \
+        build driver format clean re debug \
 	    vm vm-gui vm-clean vm-xml-boot log

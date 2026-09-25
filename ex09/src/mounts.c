@@ -11,7 +11,6 @@
 #include <mount.h>
 #include "../include/mounts.h"
 
-
 struct mymounts_flag {
 	int flag;
 	const char *str;

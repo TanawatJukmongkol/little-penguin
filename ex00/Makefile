@@ -7,7 +7,7 @@ KERNEL_IMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage
 
 BUILD_JOBS	?= $(shell expr $(shell nproc) \* 3 / 2)
 
-all: linux mrproper build log
+all: linux unpatch build log
 
 linux:
 	KERN_BUILD=$(KERN_BUILD) \
@@ -17,7 +17,11 @@ savecfg:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) savecfg BAK_CFG=$(abspath $(BAK_CFG))
 
-mrproper:
+# ex02 patches this same tree; take its EXTRAVERSION back out.
+unpatch:
+	$(MAKE) -C $(ROOT)/ex02 patch-r
+
+mrproper: unpatch
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) mrproper BAK_CFG=$(abspath $(BAK_CFG))
 
@@ -61,4 +65,4 @@ debug:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) debug
 
-.PHONY: all linux config savecfg mrproper build driver log clean re vm vm-gui debug
+.PHONY: all linux unpatch config savecfg mrproper build driver log clean re vm vm-gui debug

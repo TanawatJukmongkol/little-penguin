@@ -5,10 +5,10 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("tjukmong");
 MODULE_DESCRIPTION("A simple debugfs driver.");
 
-static t_debug debugfs = (t_debug) {
+static struct s_debug debugfs = (struct s_debug) {
 	.name = "fortytwo", .type = DBG_DIR,
 	.perm = 0666,
-	.entry = (t_debug []) {
+	.entry = (struct s_debug []) {
 		{
 			.name = "id", .type = DBG_FILE,
 			.perm = 0666,

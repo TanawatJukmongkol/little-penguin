@@ -2,7 +2,7 @@
 #include <linux/err.h>
 #include "../include/debugfs.h"
 
-int init_debugfs(t_debug *dbg)
+int init_debugfs(struct s_debug *dbg)
 {
 	struct dentry *parent_root = dbg->parent ? dbg->parent->root : NULL;
 	int error;
@@ -33,7 +33,7 @@ int init_debugfs(t_debug *dbg)
 		if (error != 0)
 			return error;
 		dbg->root = debugfs_create_file(dbg->name, dbg->perm,
-						dbg->parent->root, NULL, &dbg->fops);
+						dbg->parent->root, NULL, dbg->fops);
 		if (IS_ERR(dbg->root))
 			return -ENODEV;
 		break;
@@ -43,7 +43,7 @@ int init_debugfs(t_debug *dbg)
 	return 0;
 }
 
-int dest_debugfs(t_debug *dbg)
+int dest_debugfs(struct s_debug *dbg)
 {
 	int error;
 

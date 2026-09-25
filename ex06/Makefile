@@ -87,6 +87,10 @@ clean:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) clean
 
+fclean:
+	KERN_BUILD=$(KERN_BUILD) \
+	$(MAKE) -C $(ROOT) fclean
+
 re: clean mrproper all
 
 vm: $(KERNEL_IMG)
@@ -101,4 +105,4 @@ debug:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) debug
 
-.PHONY: all linux config savecfg mrproper patch patch-r build driver log clean re vm vm-gui debug
+.PHONY: all linux config savecfg mrproper patch patch-r build driver log clean fclean re vm vm-gui debug

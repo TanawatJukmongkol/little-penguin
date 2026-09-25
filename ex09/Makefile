@@ -66,11 +66,15 @@ config: hook
 	make -C $(KERN_BUILD) CC=$(CC) $(MAKE_FLAGS) olddefconfig
 
 clean: unhook
+	rm -f src/*.o src/*.a src/.*.cmd src/modules.order
+
+fclean: clean
 	make -C $(KERN_BUILD) $(MAKE_FLAGS) clean
+	rm -rf compile_commands.json .cache
 
 format: all
 	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
-re: clean all
+re: fclean all
 
-.PHONY: all clean format re hook config unhook
+.PHONY: all clean fclean format re hook config unhook

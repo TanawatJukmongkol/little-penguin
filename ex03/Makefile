@@ -35,9 +35,12 @@ clean:
 	M=$(shell pwd) \
 	$(MAKE_FLAGS) clean
 
+fclean: clean
+	rm -rf compile_commands.json .cache
+
 format: all
 	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
-re: clean all
+re: fclean all
 
-.PHONY: all $(NAME).ko clean format re
+.PHONY: all $(NAME).ko clean fclean format re

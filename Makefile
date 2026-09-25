@@ -118,12 +118,18 @@ clean:
 		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder clean; \
 	done
 
+fclean:
+	for folder in $(PROJECTS); do \
+		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder fclean; \
+	done
+	make CC=$(CC) $(MAKE_FLAGS) -C $(KERN_BUILD) clean
+
 format:
 	for folder in $(PROJECTS); do \
 		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder format; \
 	done
 
-re: clean all
+re: fclean all
 
 vm: vm-clean vm-xml-boot
 
@@ -183,5 +189,5 @@ log:
 	@echo "Boot log saved to $(LOG)"
 
 .PHONY: all linux savecfg mrproper config \
-        build driver format clean re debug \
+        build driver format clean fclean re debug \
 	    vm vm-gui vm-clean vm-xml-boot log

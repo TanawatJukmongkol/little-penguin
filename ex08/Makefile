@@ -35,6 +35,9 @@ clean:
 	M=$(shell pwd) \
 	$(MAKE_FLAGS) clean
 
+fclean: clean
+	rm -rf compile_commands.json .cache
+
 format: all
 	$(KERN_BUILD)/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(SRCS)
 
@@ -48,6 +51,6 @@ uninstall-rules:
 
 reinstall-rules: uninstall-rules install-rules
 
-re: clean all
+re: fclean all
 
-.PHONY: all $(NAME).ko clean format re install-rules uninstall-rules reinstall-rules
+.PHONY: all $(NAME).ko clean fclean format re install-rules uninstall-rules reinstall-rules

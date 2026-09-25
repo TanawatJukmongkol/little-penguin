@@ -47,7 +47,7 @@
     <controller type="pci" index="0" model="pci-root"/>
     <controller type="sata" index="0"/>
     <controller type="virtio-serial" index="0"/>
-    <filesystem type="mount" accessmode="passthrough">
+    <filesystem type="mount" accessmode="squash">
       <source dir="${PWD}"/>
       <target dir="qemu_share"/>
     </filesystem>

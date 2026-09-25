@@ -1,6 +1,6 @@
 ROOT			= ..
 KERN_BUILD		= linux
-BAK_CFG			= config
+BAK_CFG			= .config
 FULL_SRC_PATH	= $(ROOT)/$(KERN_BUILD)
 LOG				= $(abspath kernel.log)
 KERNEL_IMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage

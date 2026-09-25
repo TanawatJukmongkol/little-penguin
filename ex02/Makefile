@@ -1,7 +1,7 @@
 ROOT			= ..
 KERN_BUILD		= linux
 # Same tree as Assignment 00, so it shares that config.
-BAK_CFG			= $(ROOT)/ex00/config
+BAK_CFG			= $(ROOT)/ex00/.config
 FULL_SRC_PATH	= $(ROOT)/$(KERN_BUILD)
 LOG				= $(abspath kernel.log)
 KERNEL_IMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage

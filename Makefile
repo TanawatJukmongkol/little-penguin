@@ -23,7 +23,7 @@ CMDLINE ?= root=$(ROOT_PART) loglevel=4 console=ttyS0 nokaslr
 # Fixed, not ?=: the nix dev shell exports CC=clang, and a different compiler
 # name changes every object's saved command, so kbuild rebuilds the whole tree.
 CC = cc
-BAK_CFG = ex00/config
+BAK_CFG = ex00/.config
 
 # Project build (1st line = in-tree kernels, 2nd line = modules)
 PROJECTS = \

@@ -4,7 +4,7 @@ all:	patch build
 revert:	patch-r build
 
 ../linux:
-	make -C .. linux
+	$(MAKE) -C .. linux
 
 patch: ../linux
 	patch ../linux/Makefile $(NAME)
@@ -12,10 +12,10 @@ patch: ../linux
 patch-r: ../linux
 	patch -R ../linux/Makefile $(NAME)
 
-build:
-	make -C .. build
+build: ../linux
+	$(MAKE) -C .. build
 
 format: ../linux
 	../linux/scripts/checkpatch.pl -strict -no-tree -fix-inplace -file $(NAME)
 
-.PHONY: patch patch-r build format
+.PHONY: all revert patch patch-r build format

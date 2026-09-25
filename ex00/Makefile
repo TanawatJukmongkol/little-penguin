@@ -1,5 +1,5 @@
 ROOT			= ..
-KERN_BUILD		= linux-next
+KERN_BUILD		= linux
 BAK_CFG			= config
 FULL_SRC_PATH	= $(ROOT)/$(KERN_BUILD)
 LOG				= $(abspath kernel.log)
@@ -7,29 +7,9 @@ KERNEL_IMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage
 
 BUILD_JOBS	?= $(shell expr $(shell nproc) \* 3 / 2)
 
-PATCHES		= 0001-fs-buffer-fix-NULL-deref-on-folio-less-bh-in-__bh_submit.patch
+all: linux mrproper build log
 
-all: linux mrproper patch build log
-
-# linux-next isn't the root's v6.14 tag, so clone it here first; the root
-# `linux` rule then only seeds .config.
-$(FULL_SRC_PATH):
-	git clone --depth 1 \
-		https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git \
-		$(FULL_SRC_PATH)
-	cd $(FULL_SRC_PATH) && git fetch --tags
-
-patch: linux
-	for p in $(PATCHES); do \
-		patch -p1 -d $(FULL_SRC_PATH) < $$p; \
-	done
-
-patch-r: linux
-	for p in $(PATCHES); do \
-		patch -R -p1 -d $(FULL_SRC_PATH) < $$p; \
-	done
-
-linux: $(FULL_SRC_PATH)
+linux:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) linux BAK_CFG=$(abspath $(BAK_CFG))
 
@@ -81,4 +61,4 @@ debug:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) debug
 
-.PHONY: all linux config savecfg mrproper patch patch-r build driver log clean re vm vm-gui debug
+.PHONY: all linux config savecfg mrproper build driver log clean re vm vm-gui debug

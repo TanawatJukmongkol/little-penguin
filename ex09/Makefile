@@ -4,10 +4,6 @@ NAME		= mymounts
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-sign-compare -g -DDEBUG
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
-# LLVM=1/LD=ld/ARCH=x86_64 mirror ../Makefile: this tree only has clang
-# available, and ld.lld corrupts the x86 real-mode trampoline, so host
-# tools (HOSTCC) and the module build both need to be pointed at clang
-# explicitly, not just $(CC).
 MAKE_FLAGS	= LLVM=1 LD=ld ARCH=x86_64 -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
@@ -79,4 +75,4 @@ format: all
 
 re: clean all
 
-.PHONY: all clean format re install-rules uninstall-rules hook config unhook
+.PHONY: all clean format re hook config unhook

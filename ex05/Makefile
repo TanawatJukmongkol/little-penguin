@@ -53,4 +53,4 @@ reinstall-rules: uninstall-rules install-rules
 
 re: clean all
 
-.PHONY: all $(NAME).ko clean format re install-rules uninstall-rules
+.PHONY: all $(NAME).ko clean format re install-rules uninstall-rules reinstall-rules

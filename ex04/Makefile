@@ -25,7 +25,7 @@ $(NAME)-y	+= $(SRCS:.c=.o)
 ccflags-y	+= $(CFLAGS)
 obj-m		+= $(NAME).o
 
-all: $(NAME).ko Makefile
+all: $(NAME).ko
 
 $(NAME).ko: $(SRCS) $(HEADERS)
 	bear -- make -C $(KERN_BUILD) \
@@ -46,8 +46,8 @@ install-rules:
 	sudo cp 10-keyboard.rules /etc/udev/rules.d/10-keyboard.rules
 	sudo cp keyboard_driver.sh /usr/local/bin/keyboard_driver.sh
 	sudo chmod +x /usr/local/bin/keyboard_driver.sh
-	sudo sed -i 's|$$KMOD_DIR|'${PWD}'|g' /usr/local/bin/keyboard_driver.sh
-	sudo sed -i 's|$$KNAME|'${NAME}'|g' /usr/local/bin/keyboard_driver.sh
+	sudo sed -i 's|$$KMOD_DIR|'$(PWD)'|g' /usr/local/bin/keyboard_driver.sh
+	sudo sed -i 's|$$KNAME|'$(NAME)'|g' /usr/local/bin/keyboard_driver.sh
 	sudo udevadm control --reload-rules && sudo udevadm trigger
 
 uninstall-rules:

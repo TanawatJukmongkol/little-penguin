@@ -186,6 +186,7 @@ log:
 		echo "Guest did not power off within $(BOOT_TIMEOUT)s, destroying it."; \
 	fi
 	@$(MAKE) --no-print-directory vm-clean
+	@sed -i -e 's/\r$$//' -e 's/\x1b\[[0-9;=?]*[A-Za-z]//g' $(LOG)
 	@echo "Boot log saved to $(LOG)"
 
 .PHONY: all linux savecfg mrproper config \

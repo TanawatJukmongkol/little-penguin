@@ -1,4 +1,4 @@
-[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[    0.000000] Linux version 6.14.0-thor_kernel-g82a3be0ecc1a (airgeddon1337@nixos) (clang version 18.1.8, GNU ld (GNU Binutils) 2.43.1) #4 SMP PREEMPT_DYNAMIC Sat Sep 26 01:01:16 +07 2026
+[    0.000000] Linux version 6.14.0-thor_kernel-g82a3be0ecc1a (airgeddon1337@nixos) (clang version 18.1.8, GNU ld (GNU Binutils) 2.43.1) #4 SMP PREEMPT_DYNAMIC Sat Sep 26 01:01:16 +07 2026
 [    0.000000] Command line: root=/dev/sda4 console=ttyS0 nokaslr ignore_loglevel panic=-1 TERM=dumb systemd.run="/bin/uname -a" systemd.run_success_action=poweroff systemd.run_failure_action=poweroff
 [    0.000000] BIOS-provided physical RAM map:
 [    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009ffff] usable

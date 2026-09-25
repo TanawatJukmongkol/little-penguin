@@ -1,4 +1,4 @@
-[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[    0.000000] Linux version 7.3.0-rc2-next-20260911-05227-g42bf58a28b73 (airgeddon1337@nixos) (clang version 18.1.8, GNU ld (GNU Binutils) 2.43.1) #1 SMP PREEMPT_DYNAMIC Sat Sep 26 01:25:49 +07 2026
+[    0.000000] Linux version 7.3.0-rc2-next-20260911-05227-g42bf58a28b73 (airgeddon1337@nixos) (clang version 18.1.8, GNU ld (GNU Binutils) 2.43.1) #1 SMP PREEMPT_DYNAMIC Sat Sep 26 01:25:49 +07 2026
 [    0.000000] Command line: root=/dev/sda4 console=ttyS0 nokaslr ignore_loglevel panic=-1 TERM=dumb systemd.run="/bin/uname -a" systemd.run_success_action=poweroff systemd.run_failure_action=poweroff
 [    0.000000] x86 CPU feature dependency check failure: CPU0 has '18*32+31' enabled but '18*32+26' disabled. Kernel might be fine, but no guarantees.
 [    0.000000] BIOS-provided physical RAM map:

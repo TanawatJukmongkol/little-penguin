@@ -71,21 +71,13 @@ static ssize_t debug_foo_write(struct file *filp, const char __user *buf, size_t
 {
 	ssize_t ret;
 
-	if (size > PAGE_SIZE - 1)
-		size = PAGE_SIZE - 1;
+	if (*f_pos >= PAGE_SIZE && size)
+		return -ENOSPC;
 
 	mutex_lock(&foo_lock);
-
-	if (copy_from_user(buffer, buf, size)) {
-		ret = -EFAULT;
-		goto out_unlock;
-	}
-
-	buffer[size] = '\0';
-	buffer_len = size;
-	ret = size;
-
-out_unlock:
+	ret = simple_write_to_buffer(buffer, PAGE_SIZE, f_pos, buf, size);
+	if (ret >= 0)
+		buffer_len = *f_pos;
 	mutex_unlock(&foo_lock);
 
 	return ret;

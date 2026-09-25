@@ -37,15 +37,13 @@ all: $(SRCS) $(HEADERS) config
 	bear -- make -C $(KERN_BUILD) \
 	CC=$(CC) $(MAKE_FLAGS)
 
-# Symlink the driver's source directory into the kernel tree so KBUILD
-# discovers it as drivers/misc/mymounts.
-$(TREE_DIR):
-	@- ln -s $(abspath src) $(TREE_DIR)
-
 # Register the driver with the surrounding Kconfig/Makefile. Idempotent,
 # since a fresh `make linux` clone regenerates drivers/misc/{Kconfig,Makefile}
-# without our hooks every time.
-hook: $(TREE_DIR)
+# without our hooks every time. The source directory is symlinked in-tree so
+# KBUILD discovers it as drivers/misc/mymounts; a leftover build-output
+# directory in its place is replaced.
+hook:
+	[ -L $(TREE_DIR) ] || { rm -rf $(TREE_DIR) && ln -s $(abspath src) $(TREE_DIR); }
 	grep -q '$(MOD_SUBDIR)/$(NAME)/Kconfig' $(TREE_KCONFIG) || \
 		sed -i 's#^endmenu#source "$(MOD_SUBDIR)/$(NAME)/Kconfig"\nendmenu#' $(TREE_KCONFIG)
 	grep -q '$(CONFIG_SYM)' $(TREE_MAKEFILE) || \
@@ -53,7 +51,7 @@ hook: $(TREE_DIR)
 
 # Remove the in-tree symlink and its Kconfig/Makefile hooks.
 unhook:
-	rm -f $(TREE_DIR)
+	rm -rf $(TREE_DIR)
 	sed -i '\#source "$(MOD_SUBDIR)/$(NAME)/Kconfig"#d' $(TREE_KCONFIG)
 	sed -i '\#$(CONFIG_SYM)#d' $(TREE_MAKEFILE)
 

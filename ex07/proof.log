@@ -1,0 +1,80 @@
+== ex07: debugfs /sys/kernel/debug/fortytwo ==
+# uname -r
+6.14.0
+[exit 0]
+# mountpoint -q /sys/kernel/debug || mount -t debugfs none /sys/kernel/debug
+[exit 0]
+# insmod /mnt/qemu_share/ex07/debugfs.ko
+[exit 0]
+# ls -ld /sys/kernel/debug
+drwx------ 24 root root 0 Sep 26  2026 /sys/kernel/debug
+[exit 0]
+# chmod 755 /sys/kernel/debug
+[exit 0]
+# ls -ld /sys/kernel/debug /sys/kernel/debug/fortytwo
+drwxr-xr-x 24 root root 0 Sep 26  2026 /sys/kernel/debug
+drwxr-xr-x  2 root root 0 Sep 26 00:46 /sys/kernel/debug/fortytwo
+[exit 0]
+# ls -l /sys/kernel/debug/fortytwo
+total 0
+-rw-r--r-- 1 root root 0 Sep 26 00:46 foo
+-rw-rw-rw- 1 root root 0 Sep 26 00:46 id
+-r--r--r-- 1 root root 0 Sep 26 00:46 jiffies
+[exit 0]
+-- id: read/write for everyone, same behavior as ex05
+lfs$ cat /sys/kernel/debug/fortytwo/id
+tjukmong
+[exit 0]
+lfs$ echo tjukmong > /sys/kernel/debug/fortytwo/id
+[exit 0]
+lfs$ echo wrong_login > /sys/kernel/debug/fortytwo/id
+sh: line 0: echo: write error: Invalid argument
+[exit 1]
+-- jiffies: read-only for everyone
+lfs$ cat /sys/kernel/debug/fortytwo/jiffies
+4294669544
+[exit 0]
+# sleep 1
+[exit 0]
+lfs$ cat /sys/kernel/debug/fortytwo/jiffies
+4294670560
+[exit 0]
+lfs$ echo 0 > /sys/kernel/debug/fortytwo/jiffies
+sh: /sys/kernel/debug/fortytwo/jiffies: Permission denied
+[exit 1]
+# echo 0 > /sys/kernel/debug/fortytwo/jiffies
+sh: line 0: echo: write error: Invalid argument
+[exit 1]
+-- foo: writable by root only, readable by everyone, up to one page
+lfs$ echo not_root > /sys/kernel/debug/fortytwo/foo
+sh: /sys/kernel/debug/fortytwo/foo: Permission denied
+[exit 1]
+# echo hello from root > /sys/kernel/debug/fortytwo/foo
+[exit 0]
+lfs$ cat /sys/kernel/debug/fortytwo/foo
+hello from root
+[exit 0]
+# head -c 5000 /dev/zero | tr '\000' a > /sys/kernel/debug/fortytwo/foo
+tr: write error: No space left on device
+[exit 1]
+lfs$ wc -c < /sys/kernel/debug/fortytwo/foo
+4096
+[exit 0]
+# printf 'first line\n' > /sys/kernel/debug/fortytwo/foo
+[exit 0]
+lfs$ cat /sys/kernel/debug/fortytwo/foo
+first line
+[exit 0]
+-- concurrent writers/readers on foo
+# for i in 1 2 3 4; do (for j in $(seq 200); do echo writer$i > /sys/kernel/debug/fortytwo/foo; cat /sys/kernel/debug/fortytwo/foo > /dev/null; done) & done; wait; cat /sys/kernel/debug/fortytwo/foo
+writer3
+[exit 0]
+-- cleanup on unload
+# rmmod debugfs
+[exit 0]
+# ls /sys/kernel/debug/fortytwo
+ls: cannot access '/sys/kernel/debug/fortytwo': No such file or directory
+[exit 2]
+# dmesg | grep -cE 'BUG:|Oops|Call Trace'
+0
+[exit 1]

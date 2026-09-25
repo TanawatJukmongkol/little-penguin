@@ -89,9 +89,9 @@ ssize_t device_write(struct file *file, const char __user *buf, size_t len,
 
 	pr_info("fortytwo: write() called. User provided %zu bytes.\n", len);
 
-	if (len != EXPECTED_LEN) {
-		pr_warn("fortytwo: Write failed. Expected length %zu, got %zu.\n",
-			EXPECTED_LEN, len);
+	if (len != EXPECTED_LEN && len != EXPECTED_LEN - 1) {
+		pr_warn("fortytwo: Write failed. Expected length %zu or %zu, got %zu.\n",
+			EXPECTED_LEN - 1, EXPECTED_LEN, len);
 		return -EINVAL; // Return error for incorrect length
 	}
 

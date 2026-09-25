@@ -1,6 +1,6 @@
 == ex07: debugfs /sys/kernel/debug/fortytwo ==
 # uname -r
-6.14.0
+6.14.0-dirty
 [exit 0]
 # mountpoint -q /sys/kernel/debug || mount -t debugfs none /sys/kernel/debug
 [exit 0]
@@ -9,17 +9,17 @@
 # ls -ld /sys/kernel/debug
 drwx------ 24 root root 0 Sep 26  2026 /sys/kernel/debug
 [exit 0]
-# chmod 755 /sys/kernel/debug
+# chown lfs /sys/kernel/debug
 [exit 0]
 # ls -ld /sys/kernel/debug /sys/kernel/debug/fortytwo
-drwxr-xr-x 24 root root 0 Sep 26  2026 /sys/kernel/debug
-drwxr-xr-x  2 root root 0 Sep 26 00:46 /sys/kernel/debug/fortytwo
+drwx------ 24 lfs  root 0 Sep 26  2026 /sys/kernel/debug
+drwxr-xr-x  2 root root 0 Sep 26 02:32 /sys/kernel/debug/fortytwo
 [exit 0]
 # ls -l /sys/kernel/debug/fortytwo
 total 0
--rw-r--r-- 1 root root 0 Sep 26 00:46 foo
--rw-rw-rw- 1 root root 0 Sep 26 00:46 id
--r--r--r-- 1 root root 0 Sep 26 00:46 jiffies
+-rw-r--r-- 1 root root 0 Sep 26 02:32 foo
+-rw-rw-rw- 1 root root 0 Sep 26 02:32 id
+-r--r--r-- 1 root root 0 Sep 26 02:32 jiffies
 [exit 0]
 -- id: read/write for everyone, same behavior as ex05
 lfs$ cat /sys/kernel/debug/fortytwo/id
@@ -32,12 +32,12 @@ sh: line 0: echo: write error: Invalid argument
 [exit 1]
 -- jiffies: read-only for everyone
 lfs$ cat /sys/kernel/debug/fortytwo/jiffies
-4294669544
+4294669589
 [exit 0]
 # sleep 1
 [exit 0]
 lfs$ cat /sys/kernel/debug/fortytwo/jiffies
-4294670560
+4294670604
 [exit 0]
 lfs$ echo 0 > /sys/kernel/debug/fortytwo/jiffies
 sh: /sys/kernel/debug/fortytwo/jiffies: Permission denied
@@ -67,7 +67,7 @@ first line
 [exit 0]
 -- concurrent writers/readers on foo
 # for i in 1 2 3 4; do (for j in $(seq 200); do echo writer$i > /sys/kernel/debug/fortytwo/foo; cat /sys/kernel/debug/fortytwo/foo > /dev/null; done) & done; wait; cat /sys/kernel/debug/fortytwo/foo
-writer3
+writer4
 [exit 0]
 -- cleanup on unload
 # rmmod debugfs

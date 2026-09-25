@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 config MYMOUNTS
-	tristate "Misc device mirroring /proc/mounts (mymounts)"
-	default m
+	bool "/proc/mymounts: list mount points and their names"
 	help
-	  Expose the current mount namespace's mount table through a
-	  /dev/mymounts misc character device, similar to /proc/mounts.
+	  Create /proc/mymounts, listing each mount point of the reader's
+	  mount namespace with its name ("root" for /).
 
-	  To compile this driver as a module, choose M here: the module
-	  will be called mymounts.
+	  Built-in only: it reuses the kernel's /proc/mounts iterator
+	  (mounts_op) and other fs/ internals that aren't exported to
+	  modules.

@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0
-#include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
-#include <linux/miscdevice.h>
 #include <linux/seq_file.h>
 #include <linux/nsproxy.h>
-#include <linux/ns_common.h>
 #include <linux/fs_struct.h>
+#include <linux/mnt_namespace.h>
 #include <linux/security.h>
+#include <linux/string.h>
 #include <mount.h>
 #include "../include/mounts.h"
+
+#if MYMOUNTS_FULL
 
 struct mymounts_flag {
 	int flag;
@@ -48,12 +49,13 @@ static int mymounts_show_opts(struct seq_file *m, struct vfsmount *mnt, struct s
 	return security_sb_show_options(m, sb);
 }
 
-static int mymounts_show_one(struct seq_file *m, struct mount *r, struct path *root)
+/* "<device> <mount point> <type> <options> 0 0", as in /proc/mounts */
+static int mymounts_show(struct seq_file *m, struct vfsmount *mnt)
 {
-	struct vfsmount *mnt = &r->mnt;
+	struct proc_mounts *p = m->private;
+	struct mount *r = real_mount(mnt);
 	struct path mnt_path = { .dentry = mnt->mnt_root, .mnt = mnt };
 	struct super_block *sb = mnt_path.dentry->d_sb;
-	size_t mark = m->count;
 	int err = 0;
 
 	if (sb->s_op->show_devname)
@@ -64,11 +66,7 @@ static int mymounts_show_one(struct seq_file *m, struct mount *r, struct path *r
 		return err;
 	seq_putc(m, ' ');
 
-	err = seq_path_root(m, &mnt_path, root, " \t\n\\");
-	if (err == SEQ_SKIP) {
-		m->count = mark;
-		return 0;
-	}
+	err = seq_path_root(m, &mnt_path, &p->root, " \t\n\\");
 	if (err)
 		return err;
 
@@ -84,36 +82,83 @@ static int mymounts_show_one(struct seq_file *m, struct mount *r, struct path *r
 	return err;
 }
 
-int mymounts_show(struct seq_file *m, void *v)
+#else
+
+/* "<name> <mount point>", where name is the last path component */
+static int mymounts_show(struct seq_file *m, struct vfsmount *mnt)
 {
-	struct rb_node *node;
-	struct path root;
+	struct proc_mounts *p = m->private;
+	struct path mnt_path = { .dentry = mnt->mnt_root, .mnt = mnt };
+	const char *name;
+	char *buf, *path;
 	int err = 0;
 
-	get_task_struct(current);
-	task_lock(current);
-	if (!current->nsproxy || !current->nsproxy->mnt_ns || !current->fs) {
-		task_unlock(current);
-		put_task_struct(current);
-		return 0;
+	buf = __getname();
+	if (!buf)
+		return -ENOMEM;
+
+	path = __d_path(&mnt_path, &p->root, buf, PATH_MAX);
+	if (!path) {
+		err = SEQ_SKIP;
+		goto out;
 	}
-	get_fs_root(current->fs, &root);
-
-	for (node = rb_first(&current->nsproxy->mnt_ns->mounts);
-	     node && !err; node = rb_next(node)) {
-		struct mount *r = rb_entry(node, struct mount, mnt_node);
-
-		err = mymounts_show_one(m, r, &root);
+	if (IS_ERR(path)) {
+		err = PTR_ERR(path);
+		goto out;
 	}
 
-	task_unlock(current);
-	put_task_struct(current);
-	path_put(&root);
+	name = strrchr(path, '/') + 1;
+	if (!*name)
+		name = "root";
+	seq_printf(m, "%-10s %s\n", name, path);
+out:
+	__putname(buf);
 	return err;
 }
 
-/* Open implementation linking seq_file */
+#endif
+
+/*
+ * Same setup as /proc/mounts: pin the mount namespace and root, then let
+ * the kernel's mounts_op iterate the mounts under namespace_sem.
+ */
 int mymounts_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, mymounts_show, NULL);
+	struct mnt_namespace *ns;
+	struct proc_mounts *p;
+	struct path root;
+	int ret;
+
+	task_lock(current);
+	if (!current->nsproxy || !current->nsproxy->mnt_ns || !current->fs) {
+		task_unlock(current);
+		return -ENOENT;
+	}
+	ns = current->nsproxy->mnt_ns;
+	get_mnt_ns(ns);
+	get_fs_root(current->fs, &root);
+	task_unlock(current);
+
+	ret = seq_open_private(file, &mounts_op, sizeof(struct proc_mounts));
+	if (ret) {
+		path_put(&root);
+		put_mnt_ns(ns);
+		return ret;
+	}
+
+	p = ((struct seq_file *)file->private_data)->private;
+	p->ns = ns;
+	p->root = root;
+	p->show = mymounts_show;
+	return 0;
+}
+
+int mymounts_release(struct inode *inode, struct file *file)
+{
+	struct seq_file *m = file->private_data;
+	struct proc_mounts *p = m->private;
+
+	path_put(&p->root);
+	put_mnt_ns(p->ns);
+	return seq_release_private(inode, file);
 }

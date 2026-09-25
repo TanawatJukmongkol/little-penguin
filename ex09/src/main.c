@@ -3,18 +3,19 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
+#include <linux/seq_file.h>
 #include "../include/mounts.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("tjukmong");
-MODULE_DESCRIPTION("A procfs entry mirroring /proc/mounts");
+MODULE_DESCRIPTION("A procfs entry listing mount points and their names");
 
 /* File operations bound to the /proc/mymounts entry */
 static const struct proc_ops mymounts_fops = {
 	.proc_open    = mymounts_open,
 	.proc_read    = seq_read,
 	.proc_lseek   = seq_lseek,
-	.proc_release = single_release,
+	.proc_release = mymounts_release,
 };
 
 static struct proc_dir_entry *mymounts_entry;

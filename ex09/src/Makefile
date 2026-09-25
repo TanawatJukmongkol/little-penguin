@@ -10,3 +10,8 @@ mymounts-y			+= $(patsubst src/%.c,%.o,$(SRCS))
 # struct mount/mnt_namespace are only fully defined in fs/mount.h, which
 # is private to fs/ and not on the normal module include path.
 ccflags-y			+= -I$(srctree)/fs
+
+# `make MYMOUNTS_FULL=1` switches to the full /proc/mounts format.
+ifdef MYMOUNTS_FULL
+ccflags-y			+= -DMYMOUNTS_FULL=$(MYMOUNTS_FULL)
+endif

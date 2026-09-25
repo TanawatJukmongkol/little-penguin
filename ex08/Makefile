@@ -8,7 +8,7 @@ MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
 KERN_VERSION	= $(shell uname -r)
-KERN_BUILD		?= ../linux
+KERN_BUILD		?= /lib/modules/$(KERN_VERSION)/build
 
 # Source files
 SRCS		= $(addprefix src/, \

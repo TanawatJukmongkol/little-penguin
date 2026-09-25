@@ -5,7 +5,7 @@
 # CONFIG_MYMOUNTS, instead of the M= external-module path.
 
 obj-$(CONFIG_MYMOUNTS)	+= mymounts.o
-mymounts-y			+= $(patsubst src/%.c,%.o,$(SRCS))
+mymounts-y			+= main.o mounts.o
 
 # struct mount/mnt_namespace are only fully defined in fs/mount.h, which
 # is private to fs/ and not on the normal module include path.

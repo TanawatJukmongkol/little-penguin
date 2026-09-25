@@ -35,7 +35,7 @@ HEADERS		= $(addprefix include/, \
 # top-level kbuild target instead of targeting a module path.
 all: $(SRCS) $(HEADERS) config
 	bear -- make -C $(KERN_BUILD) \
-	CC=$(CC) SRCS="$(SRCS)" $(MAKE_FLAGS)
+	CC=$(CC) $(MAKE_FLAGS)
 
 # Symlink the driver's source directory into the kernel tree so KBUILD
 # discovers it as drivers/misc/mymounts.

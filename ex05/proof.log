@@ -1,0 +1,35 @@
+== ex05: misc char device /dev/fortytwo ==
+# uname -r
+6.14.0
+[exit 0]
+# insmod /mnt/qemu_share/ex05/fortytwo.ko
+[exit 0]
+# ls -l /dev/fortytwo
+crw------- 1 root root 10, 125 Sep 26 00:46 /dev/fortytwo
+[exit 0]
+# cat /dev/fortytwo
+tjukmong
+[exit 0]
+# echo tjukmong > /dev/fortytwo
+[exit 0]
+# printf tjukmong > /dev/fortytwo
+[exit 0]
+# echo wrong_login > /dev/fortytwo
+sh: line 0: echo: write error: Invalid argument
+[exit 1]
+# echo tjukmongx > /dev/fortytwo
+sh: line 0: echo: write error: Invalid argument
+[exit 1]
+# dmesg | grep fortytwo: | tail -n 6
+[    2.412815] fortytwo: Write failed. Expected length 8 or 9, got 12.
+[    2.413554] fortytwo: misc device 'fortytwo' closed (open count = 0)
+[    2.417039] fortytwo: misc device 'fortytwo' opened (open count = 1)
+[    2.417055] fortytwo: write() called. User provided 10 bytes.
+[    2.417057] fortytwo: Write failed. Expected length 8 or 9, got 10.
+[    2.417762] fortytwo: misc device 'fortytwo' closed (open count = 0)
+[exit 0]
+# rmmod fortytwo
+[exit 0]
+# ls -l /dev/fortytwo
+ls: cannot access '/dev/fortytwo': No such file or directory
+[exit 2]

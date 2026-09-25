@@ -1,0 +1,69 @@
+== ex04: module auto-loaded when a USB keyboard is plugged in ==
+# uname -r
+6.14.0
+[exit 0]
+# cp /mnt/qemu_share/ex04/10-keyboard.rules /etc/udev/rules.d/10-keyboard.rules
+[exit 0]
+# cp /mnt/qemu_share/ex04/keyboard_driver.sh /usr/local/bin/keyboard_driver.sh
+[exit 0]
+# chmod +x /usr/local/bin/keyboard_driver.sh
+[exit 0]
+# sed -i 's|$KMOD_DIR|/mnt/qemu_share/ex04|g; s|$KNAME|keyboard-driver|g' /usr/local/bin/keyboard_driver.sh
+[exit 0]
+# cat /etc/udev/rules.d/10-keyboard.rules /usr/local/bin/keyboard_driver.sh
+SUBSYSTEM=="usb", ACTION=="add", ATTR{bInterfaceClass}=="03", ATTR{bInterfaceProtocol}=="01", ENV{DEVPATH}=="/devices/*", RUN+="/usr/local/bin/keyboard_driver.sh"
+SUBSYSTEM=="usb", ACTION=="change", ENV{DRIVER_UNLOAD}=="1", RUN+="/sbin/rmmod keyboard_driver"
+#!/usr/bin/env bash
+
+grep -q '^keyboard_driver ' /proc/modules || /sbin/insmod /mnt/qemu_share/ex04/keyboard-driver.ko
+[exit 0]
+# udevadm control --reload-rules
+[exit 0]
+# lsmod | grep keyboard_driver
+[exit 1]
+-- plugging in the USB keyboard (host passes the dongle through now)
+# sleep 2
+[exit 0]
+# lsusb 2>/dev/null | grep -i 0c45:fefe || cat /sys/bus/usb/devices/*/product
+Bridge75 2.4G
+xHCI Host Controller
+xHCI Host Controller
+[exit 0]
+# lsmod | grep keyboard_driver
+keyboard_driver        12288  0
+[exit 0]
+# dmesg | grep -iE 'usb [0-9-]+: new|Bridge75|keyboard_driver|input:' | tail -n 12
+[    3.824025] input: Bridge75 2.4G Consumer Control as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input6
+[    3.875130] input: Bridge75 2.4G System Control as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input7
+[    3.875940] input: Bridge75 2.4G Keyboard as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input8
+[    3.876105] input: Bridge75 2.4G System Multi Axis as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input9
+[    3.876964] input: Bridge75 2.4G as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input10
+[    3.877486] hid-generic 0003:0C45:FEFE.0003: input,hiddev96,hidraw2: USB HID v1.00 Keyboard [Bridge75 2.4G] on usb-0000:00:05.0-4/input2
+[    3.882681] hid-generic 0003:0C45:FEFE.0004: hiddev97,hidraw3: USB HID v1.00 Device [Bridge75 2.4G] on usb-0000:00:05.0-4/input3
+[    3.887860] hid-generic 0003:0C45:FEFE.0005: hiddev98,hidraw4: USB HID v1.00 Device [Bridge75 2.4G] on usb-0000:00:05.0-4/input4
+[    3.901083] keyboard_driver: loading out-of-tree module taints kernel.
+[    3.901854] keyboard_driver: Loading USB keyboard driver...
+[    3.901896] usbcore: registered new interface driver keyboard_driver
+[    3.901898] keyboard_driver: Loading USB keyboard driver successfully!
+[exit 0]
+-- the keyboard still belongs to the normal HID driver, so it keeps working
+# ls /sys/bus/usb/drivers/usbhid/ | grep :
+1-4:1.0
+1-4:1.1
+1-4:1.2
+1-4:1.3
+1-4:1.4
+[exit 0]
+-- unplugging the USB keyboard (host stops the redirection now)
+# sleep 2
+[exit 0]
+# lsmod | grep keyboard_driver
+keyboard_driver        12288  0
+[exit 0]
+# dmesg | grep -iE 'USB disconnect|keyboard_driver' | tail -n 6
+[    3.901083] keyboard_driver: loading out-of-tree module taints kernel.
+[    3.901854] keyboard_driver: Loading USB keyboard driver...
+[    3.901896] usbcore: registered new interface driver keyboard_driver
+[    3.901898] keyboard_driver: Loading USB keyboard driver successfully!
+[    6.827249] usb 1-4: USB disconnect, device number 2
+[exit 0]

@@ -121,9 +121,9 @@ static ssize_t debug_id_write(struct file *filp, const char __user *buf, size_t 
 
 	pr_info("debugfs: write() called. User provided %zu bytes.\n", size);
 
-	if (size != EXPECTED_LEN) {
-		pr_warn("debugfs: Write failed. Expected length %zu, got %zu.\n",
-			EXPECTED_LEN, size);
+	if (size != EXPECTED_LEN && size != EXPECTED_LEN - 1) {
+		pr_warn("debugfs: Write failed. Expected length %zu or %zu, got %zu.\n",
+			EXPECTED_LEN - 1, EXPECTED_LEN, size);
 		return -EINVAL;
 	}
 

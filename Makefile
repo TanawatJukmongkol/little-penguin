@@ -1,5 +1,5 @@
 # Libvirt configurations
-VM_NAME = kernel-debug-vm
+VM_NAME = little-penguin
 VM_DISK = ft_linux/lfs.qcow2
 ROOT_PART = /dev/sda4
 OVMF_PATH ?= /usr/share/ovmf/OVMF.fd

@@ -276,8 +276,6 @@ The kernel development community. (n.d.). *Kernel Address Sanitizer (KASAN)*. Th
 
 Corbet, J., Rubini, A., & Kroah-Hartman, G. (2005). *Linux device drivers* (3rd ed.). O'Reilly Media. https://lwn.net/Kernel/LDD3/
 
-Beekmans, G., & Burgess, B. (Eds.). (2024). *Linux From Scratch* (Version 12.2-systemd). Linux From Scratch Project. https://www.linuxfromscratch.org/lfs/view/12.2-systemd/
-
 libvirt Project. (n.d.). *Domain XML format*. libvirt. Retrieved September 26, 2026, from https://libvirt.org/formatdomain.html
 
 QEMU Project. (n.d.). *9p-virtio: Documentation/9psetup*. QEMU Wiki. Retrieved September 26, 2026, from https://wiki.qemu.org/Documentation/9psetup

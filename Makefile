@@ -14,7 +14,7 @@ CPU_SOCKETS ?= $(shell lscpu | awk -F: '/^Socket\(s\):/{gsub(/ /,"",$$2); print 
 CPU_CORES ?= $(shell lscpu | awk -F: '/^Core\(s\) per socket:/{gsub(/ /,"",$$2); print $$2}')
 CPU_THREADS ?= $(shell lscpu | awk -F: '/^Thread\(s\) per core:/{gsub(/ /,"",$$2); print $$2}')
 VCPU_COUNT ?= $(shell nproc)
-# Highest valid vcpu id, for the NUMA cell's cpus="0-N" range in virtmgr.xml.
+# Highest valid vcpu id, for the NUMA cell's cpus="0-N" range in tools/vm/little-penguin.xml.
 VCPU_LAST ?= $(shell echo $$(($(VCPU_COUNT) - 1)))
 
 # Kernel configurations
@@ -26,9 +26,18 @@ CC = cc
 BAK_CFG = ex00/.config
 
 # Project build (1st line = in-tree kernels, 2nd line = modules)
-PROJECTS = \
-	ex09 \
-	ex01 ex03 ex04 ex05 ex07 ex08
+
+SRCS_INTREE  = ex09
+SRCS_PROJECT = ex01 ex03 ex04 ex05 ex07 ex08
+SRCS_CUSTOM  = ex00 ex02 ex06
+
+SRCS_BUILD = $(SRCS_INTREE) $(SRCS_PROJECT)
+SRCS_ALL   = $(SRCS_BUILD) $(SRCS_CUSTOM)
+
+# The custom (wrapper) Makefiles call back into this one for driver, clean,
+# fclean and format. NESTED breaks that loop: nested runs skip the wrappers,
+# and the wrappers do nothing when called from here.
+SRCS_LOOP  = $(if $(NESTED),$(SRCS_BUILD),$(SRCS_ALL))
 
 BUILD_JOBS ?= $(shell expr $(shell nproc) \* 3 / 2)
 
@@ -108,28 +117,39 @@ config: $(KERN_BUILD)/.config
 build: linux
 	KERN_BUILD=$(KERN_BUILD) make CC=$(CC) $(MAKE_FLAGS) -C $(KERN_BUILD)
 
+# Projects build through their default goal; the wrappers' default goal is
+# their whole `all` (build + boot), so they get `driver` instead.
 driver:
-	for folder in $(PROJECTS); do \
-		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder; \
+	for folder in $(SRCS_LOOP); do \
+		case " $(SRCS_CUSTOM) " in *" $$folder "*) goal=driver ;; *) goal= ;; esac; \
+		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
+		$(MAKE) --no-print-directory -C $$folder $$goal; \
 	done
 
 clean:
-	for folder in $(PROJECTS); do \
-		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder clean; \
+	for folder in $(SRCS_LOOP); do \
+		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
+		$(MAKE) --no-print-directory -C $$folder clean; \
 	done
 
 fclean:
-	for folder in $(PROJECTS); do \
-		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder fclean; \
+	for folder in $(SRCS_LOOP); do \
+		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
+		$(MAKE) --no-print-directory -C $$folder fclean; \
 	done
 	make CC=$(CC) $(MAKE_FLAGS) -C $(KERN_BUILD) clean
 
 format:
-	for folder in $(PROJECTS); do \
-		KERN_BUILD=$(abspath $(KERN_BUILD)) $(MAKE) --no-print-directory -C $$folder format; \
+	for folder in $(SRCS_LOOP); do \
+		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
+		$(MAKE) --no-print-directory -C $$folder format; \
 	done
 
 re: fclean all
+
+# Test suite and proof transcripts, run in the VM (see tools/tests/Makefile).
+test proof:
+	KERN_BUILD=$(KERN_BUILD) $(MAKE) -C tools/tests $@
 
 vm: vm-clean vm-xml-boot
 
@@ -159,7 +179,7 @@ vm-xml-boot:
 	 VCPU_COUNT="$(VCPU_COUNT)" \
 	 VCPU_LAST="$(VCPU_LAST)" \
 	 VIDEO_DEVICE='$(VIDEO_DEVICE)' \
-	 envsubst '$$VM_NAME $$KERNEL_IMG $$CMDLINE $$VM_DISK_ABS $$PWD $$OVMF_PATH $$QEMU_BIN $$CPU_SOCKETS $$CPU_CORES $$CPU_THREADS $$VCPU_COUNT $$VCPU_LAST $$VIDEO_DEVICE' < virtmgr.xml \
+	 envsubst '$$VM_NAME $$KERNEL_IMG $$CMDLINE $$VM_DISK_ABS $$PWD $$OVMF_PATH $$QEMU_BIN $$CPU_SOCKETS $$CPU_CORES $$CPU_THREADS $$VCPU_COUNT $$VCPU_LAST $$VIDEO_DEVICE' < tools/vm/little-penguin.xml \
 	 | $(SERIAL_FILTER) > /tmp/$(VM_NAME).xml
 	@virsh --connect qemu:///session define /tmp/$(VM_NAME).xml
 	@rm -f /tmp/$(VM_NAME).xml
@@ -169,7 +189,7 @@ vm-xml-boot:
 		virsh --connect qemu:///session console $(VM_NAME); \
 	fi
 
-# Attach to the guest's gdb stub (-gdb tcp::1122 in virtmgr.xml).
+# Attach to the guest's gdb stub (-gdb tcp::1122 in tools/vm/little-penguin.xml).
 debug:
 	gdb $(KERN_BUILD)/vmlinux -tui -ex 'target remote :1122'
 
@@ -190,5 +210,5 @@ log:
 	@echo "Boot log saved to $(LOG)"
 
 .PHONY: all linux savecfg mrproper config \
-        build driver format clean fclean re debug \
+        build driver format clean fclean re test proof debug \
 	    vm vm-gui vm-clean vm-xml-boot log

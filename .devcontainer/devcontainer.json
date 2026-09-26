@@ -1,6 +1,6 @@
 {
     "name": "little-penguin",
-    "dockerComposeFile": "../docker-compose.yaml",
+    "dockerComposeFile": "../tools/docker-compose.yaml",
     "service": "dev-container",
     "workspaceFolder": "/ws",
     "customizations": {

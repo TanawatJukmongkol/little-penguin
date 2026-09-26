@@ -1,0 +1,8 @@
+# Allow list: everything here is ignored unless listed below.
+*
+!.gitignore
+!.config
+!0001-fs-buffer-fix-NULL-deref-on-folio-less-bh-in-__bh_submit.patch
+!Makefile
+!README.md
+!kernel.log

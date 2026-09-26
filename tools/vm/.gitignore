@@ -1,6 +1,4 @@
 # Allow list: everything here is ignored unless listed below.
 *
 !.gitignore
-!Makefile
-!src/
-!src/*.c
+!little-penguin.xml

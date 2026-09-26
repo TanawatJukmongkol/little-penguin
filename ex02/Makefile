@@ -67,22 +67,32 @@ build: linux
 $(KERNEL_IMG):
 	$(MAKE) build
 
-driver: build
-	KERN_BUILD=$(KERN_BUILD) \
-	BUILD_JOBS=$(BUILD_JOBS) \
-	$(MAKE) -C $(ROOT) driver
-
 log: $(KERNEL_IMG)
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) log LOG=$(LOG)
 
+format: linux
+	$(FULL_SRC_PATH)/scripts/checkpatch.pl --strict --no-tree $(PATCHES)
+
+# From the root's loops (NESTED set) these do nothing: the root already
+# covers them. Run directly, they hand over to the root.
+ifndef NESTED
+driver: build
+	KERN_BUILD=$(KERN_BUILD) NESTED=1 \
+	BUILD_JOBS=$(BUILD_JOBS) \
+	$(MAKE) -C $(ROOT) driver
+
 clean:
-	KERN_BUILD=$(KERN_BUILD) \
+	KERN_BUILD=$(KERN_BUILD) NESTED=1 \
 	$(MAKE) -C $(ROOT) clean
 
 fclean:
-	KERN_BUILD=$(KERN_BUILD) \
+	KERN_BUILD=$(KERN_BUILD) NESTED=1 \
 	$(MAKE) -C $(ROOT) fclean
+else
+driver clean fclean:
+	@:
+endif
 
 re: clean mrproper all
 
@@ -98,4 +108,4 @@ debug:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) debug
 
-.PHONY: all linux config savecfg mrproper patch patch-r build driver log clean fclean re vm vm-gui debug
+.PHONY: all linux config savecfg mrproper patch patch-r build driver log clean fclean format re vm vm-gui debug

@@ -49,18 +49,18 @@ xHCI Host Controller
 keyboard_driver        12288  0
 [exit 0]
 # dmesg | grep -iE 'usb [0-9-]+: new|Bridge75|keyboard_driver|input:' | tail -n 12
-[    5.707434] input: Bridge75 2.4G Consumer Control as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input6
-[    5.757910] input: Bridge75 2.4G System Control as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input7
-[    5.758058] input: Bridge75 2.4G Keyboard as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input8
-[    5.758263] input: Bridge75 2.4G System Multi Axis as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input9
-[    5.758389] input: Bridge75 2.4G as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input10
-[    5.758648] hid-generic 0003:0C45:FEFE.0003: input,hiddev96,hidraw2: USB HID v1.00 Keyboard [Bridge75 2.4G] on usb-0000:00:05.0-4/input2
-[    5.763607] hid-generic 0003:0C45:FEFE.0004: hiddev97,hidraw3: USB HID v1.00 Device [Bridge75 2.4G] on usb-0000:00:05.0-4/input3
-[    5.768513] hid-generic 0003:0C45:FEFE.0005: hiddev98,hidraw4: USB HID v1.00 Device [Bridge75 2.4G] on usb-0000:00:05.0-4/input4
-[    6.037809] keyboard_driver: Loading USB keyboard driver...
-[    6.040246] keyboard_driver: +Bridge75 2.4G [0c45:fefe] (1 connected).
-[    6.040307] usbcore: registered new interface driver keyboard_driver
-[    6.040311] keyboard_driver: Loading USB keyboard driver successfully!
+[    4.933368] input: Bridge75 2.4G System Control as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input7
+[    4.933700] input: Bridge75 2.4G Keyboard as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input8
+[    4.934011] input: Bridge75 2.4G System Multi Axis as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input9
+[    4.934218] input: Bridge75 2.4G as /devices/pci0000:00/0000:00:05.0/usb1/1-4/1-4:1.2/0003:0C45:FEFE.0003/input/input10
+[    4.934648] hid-generic 0003:0C45:FEFE.0003: input,hiddev96,hidraw2: USB HID v1.00 Keyboard [Bridge75 2.4G] on usb-0000:00:05.0-4/input2
+[    4.939491] hid-generic 0003:0C45:FEFE.0004: hiddev97,hidraw3: USB HID v1.00 Device [Bridge75 2.4G] on usb-0000:00:05.0-4/input3
+[    4.944791] hid-generic 0003:0C45:FEFE.0005: hiddev98,hidraw4: USB HID v1.00 Device [Bridge75 2.4G] on usb-0000:00:05.0-4/input4
+[    5.203424] keyboard_driver: loading out-of-tree module taints kernel.
+[    5.204176] keyboard_driver: Loading USB keyboard driver...
+[    5.206219] keyboard_driver: +Bridge75 2.4G [0c45:fefe] (1 connected).
+[    5.206303] usbcore: registered new interface driver keyboard_driver
+[    5.206307] keyboard_driver: Loading USB keyboard driver successfully!
 [exit 0]
 -- the keyboard interface is now taken over by keyboard_driver
 # ls /sys/bus/usb/drivers/keyboard_driver/ | grep :
@@ -74,12 +74,12 @@ keyboard_driver        12288  0
 # lsmod | grep keyboard_driver
 [exit 1]
 # dmesg | grep -iE 'USB disconnect|keyboard_driver' | tail -n 8
-[    6.040246] keyboard_driver: +Bridge75 2.4G [0c45:fefe] (1 connected).
-[    6.040307] usbcore: registered new interface driver keyboard_driver
-[    6.040311] keyboard_driver: Loading USB keyboard driver successfully!
-[    9.726168] usb 1-4: USB disconnect, device number 2
-[    9.726168] keyboard_driver: Bridge75 2.4G disconnected. 0 devices left
-[    9.833660] keyboard_driver: Unloading USB keyboard module...
-[    9.833665] usbcore: deregistering interface driver keyboard_driver
-[    9.833701] keyboard_driver: Goodbye!
+[    5.206219] keyboard_driver: +Bridge75 2.4G [0c45:fefe] (1 connected).
+[    5.206303] usbcore: registered new interface driver keyboard_driver
+[    5.206307] keyboard_driver: Loading USB keyboard driver successfully!
+[    8.795318] usb 1-4: USB disconnect, device number 2
+[    8.795318] keyboard_driver: Bridge75 2.4G disconnected. 0 devices left
+[    8.799523] keyboard_driver: Unloading USB keyboard module...
+[    8.799528] usbcore: deregistering interface driver keyboard_driver
+[    8.799567] keyboard_driver: Goodbye!
 [exit 0]

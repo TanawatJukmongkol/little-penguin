@@ -2,5 +2,8 @@
 *
 !.gitignore
 !Makefile
-!src/
-!src/*.c
+!boot.sh
+!run.sh
+!lib.sh
+!ex0[0-9]/
+!ex0[0-9]/*.sh

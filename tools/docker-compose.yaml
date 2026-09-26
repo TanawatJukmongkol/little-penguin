@@ -4,13 +4,13 @@ services:
   dev-container:
     image: little-penguin-dev:latest
     build:
-      context: .
-      dockerfile: .devcontainer/src/dev-container/Dockerfile
+      context: ..
+      dockerfile: tools/Dockerfile
     command: sleep infinity
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
-      - .:/ws
+      - ..:/ws
       - /tmp/.X11-unix:/tmp/.X11-unix
     devices:
       - /dev/dri/renderD128:/dev/dri/renderD128

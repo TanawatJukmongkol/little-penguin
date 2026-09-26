@@ -13,13 +13,13 @@ drwx------ 24 root root 0 Sep 26  2026 /sys/kernel/debug
 [exit 0]
 # ls -ld /sys/kernel/debug /sys/kernel/debug/fortytwo
 drwx------ 24 lfs  root 0 Sep 26  2026 /sys/kernel/debug
-drwxr-xr-x  2 root root 0 Sep 26 02:32 /sys/kernel/debug/fortytwo
+drwxr-xr-x  2 root root 0 Sep 26 10:01 /sys/kernel/debug/fortytwo
 [exit 0]
 # ls -l /sys/kernel/debug/fortytwo
 total 0
--rw-r--r-- 1 root root 0 Sep 26 02:32 foo
--rw-rw-rw- 1 root root 0 Sep 26 02:32 id
--r--r--r-- 1 root root 0 Sep 26 02:32 jiffies
+-rw-r--r-- 1 root root 0 Sep 26 10:01 foo
+-rw-rw-rw- 1 root root 0 Sep 26 10:01 id
+-r--r--r-- 1 root root 0 Sep 26 10:01 jiffies
 [exit 0]
 -- id: read/write for everyone, same behavior as ex05
 lfs$ cat /sys/kernel/debug/fortytwo/id
@@ -32,12 +32,12 @@ sh: line 0: echo: write error: Invalid argument
 [exit 1]
 -- jiffies: read-only for everyone
 lfs$ cat /sys/kernel/debug/fortytwo/jiffies
-4294669589
+4294678387
 [exit 0]
 # sleep 1
 [exit 0]
 lfs$ cat /sys/kernel/debug/fortytwo/jiffies
-4294670604
+4294679406
 [exit 0]
 lfs$ echo 0 > /sys/kernel/debug/fortytwo/jiffies
 sh: /sys/kernel/debug/fortytwo/jiffies: Permission denied

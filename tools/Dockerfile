@@ -1,5 +1,5 @@
 # Lightweight Nix-based dev container: the actual kernel-build toolchain
-# (clang/lld, qemu, OVMF, etc.) is defined once in ../../../flake.nix.
+# (clang/lld, qemu, OVMF, etc.) is defined once in tools/flake.nix.
 # flake.nix stays the single source of truth, but its closure is built
 # into this image below so containers start with the toolchain already
 # present instead of fetching/building it from scratch on first
@@ -25,7 +25,7 @@ RUN git config --global --add safe.directory /ws
 # Bake the devShell's package closure into the image. flake.lock pins exact
 # versions, so as long as it doesn't change, the store paths built here are
 # byte-for-byte what direnv resolves at runtime from the bind-mounted /ws.
-COPY flake.nix flake.lock /opt/flake/
+COPY tools/flake.nix tools/flake.lock /opt/flake/
 RUN nix develop /opt/flake#default --command true
 
 # direnv's allow-list is keyed on the .envrc's path plus a hash of its

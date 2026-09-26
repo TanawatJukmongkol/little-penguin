@@ -1,6 +1,11 @@
-/.direnv
-/linux
-/linux-next
-/img
-/ft_linux
-.clang-format
+# Allow list: every top-level entry is ignored unless listed below.
+# Each exercise directory keeps its own allow list for its contents.
+/*
+!/.gitignore
+!/.envrc
+!/.devcontainer/
+!/.vscode/
+!/Makefile
+!/README.md
+!/tools/
+!/ex0[0-9]/

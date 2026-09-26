@@ -1,6 +1,6 @@
 # Allow list: everything here is ignored unless listed below.
 *
 !.gitignore
+!.config
 !Makefile
-!src/
-!src/*.c
+!kernel.log

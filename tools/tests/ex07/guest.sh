@@ -1,0 +1,22 @@
+# Sourced by run.sh inside the guest, as root; helpers come from lib.sh.
+D=/sys/kernel/debug/fortytwo
+check "debugfs is mounted" 'mountpoint -q /sys/kernel/debug || mount -t debugfs none /sys/kernel/debug'
+check "insmod debugfs.ko" "insmod $S/ex07/debugfs.ko"
+check "debugfs root handed to $U with chown" "chown $U /sys/kernel/debug"
+check "fortytwo/ exists" "[ -d $D ]"
+check "id is mode 666" "[ \$(stat -c %a $D/id) = 666 ]"
+check "jiffies is mode 444" "[ \$(stat -c %a $D/jiffies) = 444 ]"
+check "foo is mode 644" "[ \$(stat -c %a $D/foo) = 644 ]"
+as_user_check "id read returns the login" "[ \"\$(cat $D/id)\" = tjukmong ]"
+as_user_check "id accepts the login from a user" "echo tjukmong > $D/id"
+as_user_check "id rejects a wrong login" "! echo wrong_login > $D/id"
+as_user_check "jiffies increases" "a=\$(cat $D/jiffies); sleep 1; b=\$(cat $D/jiffies); [ \$b -gt \$a ]"
+as_user_check "jiffies can't be written" "! echo 0 > $D/jiffies"
+as_user_check "foo can't be written by a user" "! echo not_root > $D/foo"
+check "foo can be written by root" "echo hello > $D/foo"
+as_user_check "foo can be read by a user" "[ \"\$(cat $D/foo)\" = hello ]"
+check "foo keeps at most one page" "head -c 5000 /dev/zero | tr '\\000' a > $D/foo; [ \$(wc -c < $D/foo) -eq 4096 ]"
+check "foo survives concurrent writers" "for i in 1 2 3 4; do (for j in \$(seq 200); do echo w\$i > $D/foo; cat $D/foo > /dev/null; done) & done; wait; grep -qx 'w[1-4]' $D/foo"
+check "rmmod debugfs" "rmmod debugfs"
+check "fortytwo/ is gone after unload" "[ ! -e $D ]"
+check "no kernel BUG or Oops" "! dmesg | grep -qE 'BUG:|Oops|Call Trace'"

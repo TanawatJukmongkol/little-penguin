@@ -49,7 +49,6 @@ static int mymounts_show_opts(struct seq_file *m, struct vfsmount *mnt, struct s
 	return security_sb_show_options(m, sb);
 }
 
-/* "<device> <mount point> <type> <options> 0 0", as in /proc/mounts */
 static int mymounts_show(struct seq_file *m, struct vfsmount *mnt)
 {
 	struct proc_mounts *p = m->private;
@@ -84,7 +83,6 @@ static int mymounts_show(struct seq_file *m, struct vfsmount *mnt)
 
 #else
 
-/* "<name> <mount point>", where name is the last path component */
 static int mymounts_show(struct seq_file *m, struct vfsmount *mnt)
 {
 	struct proc_mounts *p = m->private;
@@ -118,10 +116,6 @@ out:
 
 #endif
 
-/*
- * Same setup as /proc/mounts: pin the mount namespace and root, then let
- * the kernel's mounts_op iterate the mounts under namespace_sem.
- */
 int mymounts_open(struct inode *inode, struct file *file)
 {
 	struct mnt_namespace *ns;

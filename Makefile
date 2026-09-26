@@ -131,12 +131,14 @@ clean:
 		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
 		$(MAKE) --no-print-directory -C $$folder clean; \
 	done
+	KERN_BUILD=$(KERN_BUILD) $(MAKE) -C tools/tests clean
 
 fclean:
 	for folder in $(SRCS_LOOP); do \
 		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
 		$(MAKE) --no-print-directory -C $$folder fclean; \
 	done
+	KERN_BUILD=$(KERN_BUILD) $(MAKE) -C tools/tests fclean
 	make CC=$(CC) $(MAKE_FLAGS) -C $(KERN_BUILD) clean
 
 format:

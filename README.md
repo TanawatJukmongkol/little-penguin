@@ -264,7 +264,21 @@ automatically.
 > `make mrproper` in `ex00` or `ex06` restores the saved `.config`, which also
 > switches KASAN off again.
 
-## 5. Resources
+## 5. Use of LLMs disclaimer
+
+### This project made use of LLM, primarily for:
+1. Miscellaneous / Grunt work
+2. Write automation and toolings (tests, and vm automation)
+3. Rapid prototyping, and ideas
+4. Research aid, and formatting standards (with `make format`)
+5. Partial driver development aid (human reviewed and approved)
+
+### This project does not use LLM for:
+1. Decision making
+2. Project design and orcastration
+3. Workflow, and tooling design (very human)
+
+## 6. Resources
 
 The kernel development community. (n.d.). *Linux kernel coding style*. The Linux Kernel documentation. Retrieved September 26, 2026, from https://docs.kernel.org/process/coding-style.html
 

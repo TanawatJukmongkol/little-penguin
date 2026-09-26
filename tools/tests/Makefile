@@ -26,10 +26,16 @@ FAIL_RE		= ^(\e\[[0-9;]*m)?KO\b
 KASAN_CFG	= KASAN KASAN_GENERIC KASAN_INLINE KASAN_VMALLOC
 KCONFIG_FLAGS	= CC=cc LLVM=1 LD=ld ARCH=x86_64 HOSTCC=clang HOSTCXX=clang++
 
+# The guest boots this image; it's built through the root Makefile if missing
+KIMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage
+
 # Modules built against the tested kernel tree before the checks
 MODULES		= $(filter ex01 ex03 ex04 ex05 ex07 ex08,$(EX))
 
 all: test
+
+$(KIMG):
+	$(MAKE) --no-print-directory -C $(ROOT) build KERN_BUILD=$(FULL_SRC_PATH)
 
 modules:
 	for folder in $(MODULES); do \
@@ -47,21 +53,21 @@ guest:
 	$(if $(GUEST_TESTS),KERN_BUILD=$(FULL_SRC_PATH) ./boot.sh $(GUEST_TESTS))
 
 # ex04's guest and proof scripts need the USB keyboard dongle on the host.
-test: modules
+test: $(if $(GUEST_TESTS),$(KIMG)) modules
 	$(if $(filter-out $(wildcard $(EX)),$(EX)),$(error no such test: $(filter-out $(wildcard $(EX)),$(EX))))
 	rm -f $(LOGS)
 	-$(MAKE) --no-print-directory host guest
-	@fail=0; \
+	@fail=0; missing=0; \
 	for log in $(LOGS); do \
 		ex=$${log%%/*}; \
-		if [ ! -s $$log ]; then printf '%s: \033[31mKO\033[0m - %s is missing\n' $$ex $$log; fail=1; continue; fi; \
+		if [ ! -s $$log ]; then printf '%s: \033[31mKO\033[0m - %s is missing\n' $$ex $$log; fail=1; missing=$$((missing + 1)); continue; fi; \
 		sed "s|^|$$ex: |" $$log; \
 		grep -qP '$(FAIL_RE)' $$log && fail=1; \
 		grep -qP '$(PASS_RE)' $$log || fail=1; \
 	done; \
 	echo -e "\e[33m" \
 	     "$$(cat $(LOGS) 2>/dev/null | grep -cP '$(PASS_RE)') passed," \
-	     "$$(cat $(LOGS) 2>/dev/null | grep -cP '$(FAIL_RE)') failed" \
+	     "$$(($$(cat $(LOGS) 2>/dev/null | grep -cP '$(FAIL_RE)') + missing)) failed" \
 		 "\e[0m"; \
 	exit $$fail
 
@@ -74,7 +80,7 @@ kasan:
 test-kasan: kasan
 	$(MAKE) --no-print-directory test
 
-proof: modules
+proof: $(if $(PROOFS),$(KIMG)) modules
 	$(if $(PROOFS),KERN_BUILD=$(FULL_SRC_PATH) ./boot.sh $(PROOFS:%=proof:%))
 
 clean:

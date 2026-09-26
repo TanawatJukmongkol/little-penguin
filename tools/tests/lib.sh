@@ -16,13 +16,21 @@ as_user() {
 	echo "[exit $?]"
 }
 
+# ok NAME / ko NAME: print a green OK or red KO result line.
+ok() {
+	echo -e "\e[32mOK\e[0m - $1"
+}
+ko() {
+	echo -e "\e[31mKO\e[0m - $1"
+}
+
 # check NAME CMD: run CMD (with a timeout, so a hang fails instead of stalling)
-# and print a TAP-style "ok"/"not ok" line, plus CMD's output on failure.
+# and print an OK/KO line, plus CMD's output on failure.
 check() {
 	if out=$(timeout 60 sh -c "$2" 2>&1); then
-		echo "ok - $1"
+		ok "$1"
 	else
-		echo "not ok - $1"
+		ko "$1"
 		echo "$out" | sed 's/^/#   /'
 	fi
 }

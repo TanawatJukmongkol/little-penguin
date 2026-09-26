@@ -7,3 +7,8 @@
 !lib.sh
 !ex0[0-9]/
 !ex0[0-9]/*.sh
+!kasan/
+!kasan/Makefile
+!kasan/*.sh
+!kasan/src/
+!kasan/src/*.c

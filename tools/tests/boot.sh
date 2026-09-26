@@ -6,8 +6,11 @@
 set -u
 cd "$(dirname "$0")/../.."
 EXS="$*"
-LOG="$PWD/tools/tests/serial.log"; KIMG="${KERN_BUILD:-$PWD/linux}/arch/x86/boot/bzImage"; TIMEOUT=300
-CMDLINE="root=/dev/sda4 console=ttyS0 nokaslr loglevel=4 panic=-1 TERM=dumb systemd.run=\"/bin/sh -c 'mountpoint -q /mnt/qemu_share || mount -t 9p -o trans=virtio,version=9p2000.L qemu_share /mnt/qemu_share; exec /bin/sh /mnt/qemu_share/tools/tests/run.sh $EXS'\" systemd.run_success_action=poweroff systemd.run_failure_action=poweroff"
+LOG="$PWD/tools/tests/serial.log"; KTREE="${KERN_BUILD:-$PWD/linux}"; KIMG="$KTREE/arch/x86/boot/bzImage"; TIMEOUT=300
+# On a KASAN kernel, print every report, not only the first one of the boot.
+KASAN_ARGS=""
+grep -q "^CONFIG_KASAN=y" "$KTREE/.config" 2>/dev/null && KASAN_ARGS=" kasan_multi_shot"
+CMDLINE="root=/dev/sda4 console=ttyS0 nokaslr loglevel=4 panic=-1 TERM=dumb$KASAN_ARGS systemd.run=\"/bin/sh -c 'mountpoint -q /mnt/qemu_share || mount -t 9p -o trans=virtio,version=9p2000.L qemu_share /mnt/qemu_share; exec /bin/sh /mnt/qemu_share/tools/tests/run.sh $EXS'\" systemd.run_success_action=poweroff systemd.run_failure_action=poweroff"
 V="virsh --connect qemu:///session"
 SCR="$PWD/tools/tests"
 DOMAIN="$PWD/tools/vm/proof-domain.xml"

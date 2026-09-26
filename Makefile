@@ -148,7 +148,7 @@ format:
 re: fclean all
 
 # Test suite and proof transcripts, run in the VM (see tools/tests/Makefile).
-test proof:
+test test-kasan kasan proof:
 	KERN_BUILD=$(KERN_BUILD) $(MAKE) -C tools/tests $@
 
 vm: vm-clean vm-xml-boot
@@ -210,5 +210,5 @@ log:
 	@echo "Boot log saved to $(LOG)"
 
 .PHONY: all linux savecfg mrproper config \
-        build driver format clean fclean re test proof debug \
+        build driver format clean fclean re test test-kasan kasan proof debug \
 	    vm vm-gui vm-clean vm-xml-boot log

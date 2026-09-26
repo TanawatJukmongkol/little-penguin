@@ -1,6 +1,6 @@
 # Sourced by run.sh inside the guest, as root; helpers come from lib.sh.
 if [ ! -e /proc/mymounts ]; then
-	ok "/proc/mymounts # SKIP ex09 isn't built into this kernel"
+	ko "/proc/mymounts exists (ex09 isn't built into this kernel)"
 	return 0
 fi
 check "first line is root /" "head -n 1 /proc/mymounts | grep -qE '^root +/\$'"

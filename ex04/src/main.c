@@ -26,7 +26,7 @@ int my_module_init(void)
 	pr_info("keyboard_driver: Loading USB keyboard driver...\n");
 	usb_res = usb_register(&usb_skell);
 	if (usb_res)
-		return -usb_res;
+		return usb_res;
 	pr_info("keyboard_driver: Loading USB keyboard driver successfully!\n");
 	return 0;
 }

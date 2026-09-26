@@ -98,7 +98,7 @@ little-penguin/
 ```
 
 The defaults are set at the top of the root [Makefile](Makefile) and can be
-overridden:
+overridden (the test runner uses them too):
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
@@ -137,8 +137,10 @@ your host user.
 
 Other VM endpoints:
 
-- **gdb stub:** host port `1122` (`make debug`).
-- **SSH:** host port `2222` forwards to guest port `22`.
+- **gdb stub:** `127.0.0.1:1122` (`make debug`).
+- **SSH:** `127.0.0.1:2222` forwards to guest port `22` (`make vm`, `make vm-gui`).
+  libvirt has no port-forward XML for user-mode networking, so it's added
+  to libvirt's own NIC with `hostfwd_add` right after the VM starts.
 
 ## 3. Project structure
 
@@ -180,7 +182,10 @@ little-penguin/
     Makefile for a given tree (`KERN_BUILD=linux` or `linux-next`). Each keeps
     its own `.config` and `*.patch` files and the resulting `kernel.log`.
     Patches are applied with `git am`, so the version string doesn't get a
-    `-dirty` suffix.
+    `-dirty` suffix. `ex02` also puts an annotated `v6.14-thor_kernel` tag on
+    its commit, so `CONFIG_LOCALVERSION_AUTO` adds no `-g<sha>` either and the
+    kernel reports exactly `6.14.0-thor_kernel`. `ex00` and `ex02` unhook
+    `ex09` first, since its Kconfig/Makefile hooks would make the tree dirty.
 - **Coding style.** Code follows the kernel coding style and must pass
   `checkpatch.pl --strict` with no errors or warnings. `make format` runs it
   with `--fix-inplace`. `.clang-format` is a symlink to the kernel's own.
@@ -239,7 +244,8 @@ Each exercise directory can also be built on its own:
 | `make vm-gui` | Same, with a virtio GPU and no serial console; connect with virt-manager or `spicy` |
 | `make vm-clean` | Destroy and undefine the VM |
 | `make debug` | Attach `gdb` (TUI) to the VM's gdb stub on `:1122`, with `vmlinux` symbols |
-| `make log` | Boot headless, run `LOG_RUN` (default `uname -a`), power off, and save the serial console to `LOG` (default `kernel.log`), with CRs and ANSI escape codes removed |
+| `make log` | Boot headless, run `LOG_RUN` (default `fastfetch`), power off, and save the serial console to `LOG` (default `kernel.log`), with CRs and ANSI escape codes removed |
+| `make logs` | Regenerate `ex00`, `ex02` and `ex06`'s `kernel.log`: each exercise's `make` puts its tree in the right state, rebuilds and boots it |
 
 Useful variables: `CMDLINE`, `KERNEL_IMG`, `BOOT_TIMEOUT` (default 180 s),
 `LOG_RUN`, `LOG`.
@@ -248,7 +254,7 @@ Useful variables: `CMDLINE`, `KERNEL_IMG`, `BOOT_TIMEOUT` (default 180 s),
 
 | Target | Description |
 | --- | --- |
-| `make test` | Build the kernel image (if missing) and the modules, run host checks, boot the VM for guest checks, print every result and a summary. Exits non-zero on any `KO` or missing log. |
+| `make test` | Build the kernel image (if missing), `ex09` into it, and the modules (stopping at the first failed build), run host checks, boot the VM for guest checks, print every result and a summary. Exits non-zero on any `KO` or missing log. |
 | `make test EX="ex05 ex07"` | Run only some exercises |
 | `make proof` | Boot the VM and regenerate `exNN/proof.log` for exercises that have a `proof.sh` |
 | `make kasan` | Enable KASAN (generic, inline, vmalloc) in `$(KERN_BUILD)/.config` and rebuild |

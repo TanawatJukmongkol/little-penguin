@@ -1,4 +1,4 @@
-<domain xmlns:qemu="http://libvirt.org" type="kvm">
+<domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">
   <name>${VM_NAME}</name>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
@@ -84,10 +84,11 @@
     <!-- Dynamic Video tag block populated exclusively on make vm-gui -->
     ${VIDEO_DEVICE}
   </devices>
+  <!-- libvirt only honors this block under the exact qemu namespace URI
+       above; any other URI drops it silently. SSH's port forward is added
+       at runtime by the root Makefile (hostfwd_add). -->
   <qemu:commandline>
     <qemu:arg value="-gdb"/>
-    <qemu:arg value="tcp::1122"/>
-    <qemu:arg value="-netdev"/>
-    <qemu:arg value="user,id=vmnic,hostfwd=tcp::2222-:22"/>
+    <qemu:arg value="tcp:127.0.0.1:1122"/>
   </qemu:commandline>
 </domain>

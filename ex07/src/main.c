@@ -30,14 +30,20 @@ static struct s_debug debugfs = (struct s_debug) {
 
 static int my_module_init(void)
 {
+	int ret;
+
 	pr_info("debugfs: creating debug structure...\n");
-	init_debugfs(&debugfs);
-	return 0;
+	ret = init_debugfs(&debugfs);
+	if (ret < 0) {
+		pr_err("debugfs: error %d, cleaning up...\n", ret);
+		dest_debugfs(&debugfs);
+	}
+	return ret;
 }
 
 static void my_module_exit(void)
 {
-	pr_info("Cleaning up module.\n");
+	pr_info("debugfs: cleaning up module...\n");
 	dest_debugfs(&debugfs);
 }
 

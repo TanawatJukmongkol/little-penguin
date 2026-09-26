@@ -6,6 +6,7 @@ static ssize_t debug_jiffies_read(struct file *filp, char __user *buf, size_t si
 static int    debug_jiffies_destruct(struct s_debug *dbg);
 
 static const struct file_operations debug_jiffies_fops = {
+	.owner = THIS_MODULE,
 	.read = debug_jiffies_read,
 };
 

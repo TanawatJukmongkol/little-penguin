@@ -68,7 +68,7 @@ LOG ?= $(PWD)/kernel.log
 # Seconds to wait for the guest to power itself off before pulling the plug.
 BOOT_TIMEOUT ?= 180
 # Command run once the guest has booted; its output lands in the log.
-LOG_RUN ?= /bin/uname -a
+LOG_RUN ?= fastfetch
 # systemd.run (systemd-run-generator) boots, runs $(LOG_RUN) with its output
 # on the console, then powers off cleanly either way. ignore_loglevel puts
 # every kernel message on the serial console, and panic=-1 turns a panic into
@@ -100,8 +100,10 @@ linux:
 .clang-format:
 	ln -s $(KERN_BUILD)/.clang-format .
 
+# Make decides this is missing before `linux` runs, and `linux` may then seed
+# it from $(BAK_CFG): only fall back to defconfig when it's still missing.
 $(KERN_BUILD)/.config: | linux .clang-format
-	make -C $(KERN_BUILD) $(MAKE_FLAGS) defconfig
+	[ -f $@ ] || make -C $(KERN_BUILD) $(MAKE_FLAGS) defconfig
 
 savecfg:
 	cp $(KERN_BUILD)/.config $(BAK_CFG)
@@ -123,7 +125,7 @@ driver:
 	for folder in $(SRCS_LOOP); do \
 		case " $(SRCS_CUSTOM) " in *" $$folder "*) goal=driver ;; *) goal= ;; esac; \
 		NESTED=1 KERN_BUILD=$(abspath $(KERN_BUILD)) \
-		$(MAKE) --no-print-directory -C $$folder $$goal; \
+		$(MAKE) --no-print-directory -C $$folder $$goal || exit 1; \
 	done
 
 clean:
@@ -151,7 +153,8 @@ re: fclean all
 
 # Test suite and proof transcripts, run in the VM (see tools/tests/Makefile).
 test test-kasan kasan proof:
-	KERN_BUILD=$(KERN_BUILD) $(MAKE) -C tools/tests $@
+	KERN_BUILD=$(KERN_BUILD) VM_NAME=$(VM_NAME) VM_DISK=$(VM_DISK) \
+	ROOT_PART=$(ROOT_PART) $(MAKE) -C tools/tests $@
 
 vm: vm-clean vm-xml-boot
 
@@ -187,6 +190,12 @@ vm-xml-boot:
 	@rm -f /tmp/$(VM_NAME).xml
 	@echo "Starting virtual domain..."
 	@virsh --connect qemu:///session start $(VM_NAME)
+	@# SSH (host 2222 -> guest 22) on libvirt's own user-mode NIC, hostnet0.
+	@# libvirt has no slirp port-forward XML, and a -netdev passed through
+	@# <qemu:commandline> would have no NIC attached. HMP prints only on error.
+	@out=$$(virsh --connect qemu:///session qemu-monitor-command $(VM_NAME) --hmp \
+		'hostfwd_add hostnet0 tcp:127.0.0.1:2222-:22' 2>&1); \
+	[ -z "$$out" ] || echo "SSH port forward not set up: $$out"
 	@if [ "$(IS_GUI)" != "1" ] && [ -z "$(SERIAL_LOG)" ]; then \
 		virsh --connect qemu:///session console $(VM_NAME); \
 	fi
@@ -211,6 +220,14 @@ log:
 	@sed -i -e 's/\r$$//' -e 's/\x1b\[[0-9;=?]*[A-Za-z]//g' $(LOG)
 	@echo "Boot log saved to $(LOG)"
 
+# Regenerate every exNN/kernel.log through each wrapper's `all`, which first
+# puts the tree in that exercise's state (ex02's patch in or out, ex09
+# unhooked) and rebuilds: their `log` alone boots whatever bzImage is there.
+logs:
+	for folder in $(SRCS_CUSTOM); do \
+		$(MAKE) --no-print-directory -C $$folder all || exit 1; \
+	done
+
 .PHONY: all linux savecfg mrproper config \
         build driver format clean fclean re test test-kasan kasan proof debug \
-	    vm vm-gui vm-clean vm-xml-boot log
+	    vm vm-gui vm-clean vm-xml-boot log logs

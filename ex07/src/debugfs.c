@@ -4,11 +4,13 @@
 
 int init_debugfs(struct s_debug *dbg)
 {
-	struct dentry *parent_root = dbg->parent ? dbg->parent->root : NULL;
+	struct dentry *parent_root;
 	int error;
 
 	if (!dbg)
 		return -ENODEV;
+
+	parent_root = dbg->parent ? dbg->parent->root : NULL;
 
 	switch (dbg->type) {
 	case DBG_DIR:
@@ -59,18 +61,20 @@ int dest_debugfs(struct s_debug *dbg)
 				return error;
 		}
 		pr_info("}\n");
+		debugfs_remove(dbg->root);
 		break;
 	case DBG_FILE:
 		pr_info("debugfs: file name: \"%s\"\n", dbg->name);
-		if (!dbg->destruct)
-			return 0;
-		error = dbg->destruct(dbg);
-		if (error != 0)
-			return error;
+		debugfs_remove(dbg->root);
+		if (dbg->destruct) {
+			error = dbg->destruct(dbg);
+			if (error != 0)
+				return error;
+		}
 		break;
 	default:
 		return -EINVAL;
 	}
-	debugfs_remove(dbg->root);
+	dbg->root = NULL;
 	return 0;
 }

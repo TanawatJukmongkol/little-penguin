@@ -3,6 +3,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <linux/atomic.h>
 #include <linux/kernel.h>
 #include <linux/kern_levels.h>
 #include <linux/module.h>

@@ -31,15 +31,19 @@ KIMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage
 
 # Modules built against the tested kernel tree before the checks
 MODULES		= $(filter ex01 ex03 ex04 ex05 ex07 ex08,$(EX))
+# Built into the kernel image itself (see ex09/Makefile), so it goes first
+INTREE		= $(filter ex09,$(EX))
 
 all: test
 
 $(KIMG):
 	$(MAKE) --no-print-directory -C $(ROOT) build KERN_BUILD=$(FULL_SRC_PATH)
 
+# Stop at the first failed build: otherwise a stale .ko from an earlier build
+# would still pass "module builds" and get loaded by the guest tests.
 modules:
-	for folder in $(MODULES); do \
-		$(MAKE) --no-print-directory -C $(ROOT)/$$folder KERN_BUILD=$(FULL_SRC_PATH); \
+	for folder in $(INTREE) $(MODULES); do \
+		$(MAKE) --no-print-directory -C $(ROOT)/$$folder KERN_BUILD=$(FULL_SRC_PATH) || exit 1; \
 	done
 	$(if $(filter kasan,$(EX)),$(MAKE) --no-print-directory -C kasan KERN_BUILD=$(FULL_SRC_PATH))
 
@@ -65,10 +69,9 @@ test: $(if $(GUEST_TESTS),$(KIMG)) modules
 		grep -qP '$(FAIL_RE)' $$log && fail=1; \
 		grep -qP '$(PASS_RE)' $$log || fail=1; \
 	done; \
-	echo -e "\e[33m" \
-	     "$$(cat $(LOGS) 2>/dev/null | grep -cP '$(PASS_RE)') passed," \
-	     "$$(($$(cat $(LOGS) 2>/dev/null | grep -cP '$(FAIL_RE)') + missing)) failed" \
-		 "\e[0m"; \
+	printf '\033[33m %s passed, %s failed \033[0m\n' \
+	     "$$(cat $(LOGS) 2>/dev/null | grep -cP '$(PASS_RE)')" \
+	     "$$(($$(cat $(LOGS) 2>/dev/null | grep -cP '$(FAIL_RE)') + missing))"; \
 	exit $$fail
 
 kasan:

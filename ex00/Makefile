@@ -7,7 +7,7 @@ KERNEL_IMG		= $(FULL_SRC_PATH)/arch/x86/boot/bzImage
 
 BUILD_JOBS	?= $(shell expr $(shell nproc) \* 3 / 2)
 
-all: linux unpatch build log
+all: linux unpatch unhook build log
 
 linux:
 	KERN_BUILD=$(KERN_BUILD) \
@@ -20,6 +20,10 @@ savecfg:
 # ex02 patches this same tree; take its EXTRAVERSION back out.
 unpatch:
 	$(MAKE) -C $(ROOT)/ex02 patch-r
+
+# ex09's hooks edit tracked files in this tree, which would add "-dirty".
+unhook: linux
+	$(MAKE) -C $(ROOT)/ex09 unhook KERN_BUILD=$(abspath $(FULL_SRC_PATH))
 
 mrproper: unpatch
 	KERN_BUILD=$(KERN_BUILD) \
@@ -80,4 +84,4 @@ debug:
 	KERN_BUILD=$(KERN_BUILD) \
 	$(MAKE) -C $(ROOT) debug
 
-.PHONY: all linux unpatch config savecfg mrproper build driver log clean fclean format re vm vm-gui debug
+.PHONY: all linux unpatch unhook config savecfg mrproper build driver log clean fclean format re vm vm-gui debug

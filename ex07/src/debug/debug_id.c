@@ -19,10 +19,11 @@ static ssize_t debug_id_write(struct file *filp, const char __user *buf, size_t 
 static int    debug_id_destruct(struct s_debug *dbg);
 
 static const struct file_operations debug_id_fops = {
+	.owner = THIS_MODULE,
 	.open = debug_id_open,
 	.release = debug_id_release,
 	.read = debug_id_read,
-	.write = debug_id_write,
+	.write = debug_id_write
 };
 
 int debug_id_init(struct s_debug *dbg)
@@ -85,33 +86,20 @@ out_unlock:
 
 static ssize_t debug_id_read(struct file *filp, char __user *buf, size_t size, loff_t *f_pos)
 {
-	const char *data_to_send = EXPECTED_STRING;
-	size_t data_len = EXPECTED_LEN;
-	size_t bytes_to_copy;
-	unsigned long uncopied;
-
-	if (*f_pos == data_len)
-		return 0;
-
-	bytes_to_copy = min(size, data_len);
+	ssize_t ret;
 
 	pr_info("debugfs: read() called on '%s'. User requested %zu bytes.\n",
 		debug_fs_id->name, size);
 
-	uncopied = copy_to_user(buf, data_to_send, bytes_to_copy);
+	ret = simple_read_from_buffer(buf, size, f_pos, EXPECTED_STRING,
+				      EXPECTED_LEN);
+	if (ret < 0)
+		pr_err("debugfs: Failed to copy data to user space.\n");
+	else if (ret > 0)
+		pr_info("debugfs: Successfully copied %zd bytes to user.\n",
+			ret);
 
-	if (uncopied) {
-		pr_err("debugfs: Failed to copy %lu bytes to user space.\n",
-		       uncopied);
-		return -EFAULT;
-	}
-
-	pr_info("debugfs: Successfully copied %zu bytes to user.\n",
-		bytes_to_copy);
-
-	*f_pos += bytes_to_copy;
-
-	return bytes_to_copy;
+	return ret;
 }
 
 static ssize_t debug_id_write(struct file *filp, const char __user *buf, size_t size, loff_t *f_pos)

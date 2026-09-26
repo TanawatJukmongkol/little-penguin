@@ -10,6 +10,7 @@ static ssize_t debug_foo_write(struct file *filp, const char __user *buf, size_t
 static int     debug_foo_destruct(struct s_debug *dbg);
 
 static const struct file_operations debug_foo_fops = {
+	.owner = THIS_MODULE,
 	.read = debug_foo_read,
 	.write = debug_foo_write,
 };

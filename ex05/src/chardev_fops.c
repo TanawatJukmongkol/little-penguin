@@ -52,33 +52,20 @@ out_unlock:
 ssize_t device_read(struct file *file, char __user *buf, size_t len,
 		    loff_t *off)
 {
-	const char *data_to_send = "tjukmong\n";
-	size_t data_len = strlen(data_to_send);
-	size_t bytes_to_copy;
-	unsigned long uncopied;
-
-	if (*off == data_len)
-		return EOF;
-
-	bytes_to_copy = min(len, data_len);
+	ssize_t ret;
 
 	pr_info("fortytwo: read() called on '%s'. User requested %zu bytes.\n",
 		dev.name, len);
 
-	uncopied = copy_to_user(buf, data_to_send, bytes_to_copy);
+	ret = simple_read_from_buffer(buf, len, off, EXPECTED_STRING,
+				      EXPECTED_LEN);
+	if (ret < 0)
+		pr_err("fortytwo: Failed to copy data to user space.\n");
+	else if (ret > 0)
+		pr_info("fortytwo: Successfully copied %zd bytes to user.\n",
+			ret);
 
-	if (uncopied) {
-		pr_err("fortytwo: Failed to copy %lu bytes to user space.\n",
-		       uncopied);
-		return -EFAULT;
-	}
-
-	pr_info("fortytwo: Successfully copied %zu bytes to user.\n",
-		bytes_to_copy);
-
-	*off += bytes_to_copy;
-
-	return bytes_to_copy;
+	return ret;
 }
 
 ssize_t device_write(struct file *file, const char __user *buf, size_t len,

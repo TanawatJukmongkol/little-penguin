@@ -269,8 +269,8 @@ automatically.
 ### This project made use of LLM, primarily for:
 1. Miscellaneous and grunt work
 2. Write automation and toolings (tests, and vm automation)
-3. Rapid prototyping, and ideas (after solid project base)
-4. Research aid, and formatting standards (with `make format`)
+3. Rapid prototyping, ideas (after solid project base)
+4. Research aid, formatting standards, and review aid (with `make format`)
 5. Partial driver development aid
 
 ### This project does not use LLM for:

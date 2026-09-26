@@ -267,16 +267,18 @@ automatically.
 ## 5. Use of LLMs disclaimer
 
 ### This project made use of LLM, primarily for:
-1. Miscellaneous / Grunt work
+1. Miscellaneous and grunt work
 2. Write automation and toolings (tests, and vm automation)
-3. Rapid prototyping, and ideas
+3. Rapid prototyping, and ideas (after solid project base)
 4. Research aid, and formatting standards (with `make format`)
-5. Partial driver development aid (human reviewed and approved)
+5. Partial driver development aid
 
 ### This project does not use LLM for:
-1. Decision making
-2. Project design and orcastration
-3. Workflow, and tooling design (very human)
+1. Initial setup prototyping phase (no LLM involved)
+2. Decision making
+3. Project design and orcastration
+4. Workflow, and tooling design (very human)
+5. Vibe coding (manually write code, when LLM hallucinates)
 
 ## 6. Resources
 

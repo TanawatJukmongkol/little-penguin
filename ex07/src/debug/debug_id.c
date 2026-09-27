@@ -56,8 +56,8 @@ static int debug_id_open(struct inode *inode, struct file *filp)
 out_unlock:
 	mutex_unlock(&id_mutex);
 
-	pr_info("debugfs: file '%s' opened (open count = %d)\n",
-		debug_fs_id->name, id_open);
+	pr_trace("debugfs: file '%s' opened (open count = %d)\n",
+		 debug_fs_id->name, id_open);
 
 	return ret;
 }
@@ -78,8 +78,8 @@ static int debug_id_release(struct inode *inode, struct file *filp)
 out_unlock:
 	mutex_unlock(&id_mutex);
 
-	pr_info("debugfs: file '%s' closed (open count = %d)\n",
-		debug_fs_id->name, id_open);
+	pr_trace("debugfs: file '%s' closed (open count = %d)\n",
+		 debug_fs_id->name, id_open);
 
 	return ret;
 }
@@ -88,8 +88,8 @@ static ssize_t debug_id_read(struct file *filp, char __user *buf, size_t size, l
 {
 	ssize_t ret;
 
-	pr_info("debugfs: read() called on '%s'. User requested %zu bytes.\n",
-		debug_fs_id->name, size);
+	pr_trace("debugfs: read() called on '%s'. User requested %zu bytes.\n",
+		 debug_fs_id->name, size);
 
 	ret = simple_read_from_buffer(buf, size, f_pos, EXPECTED_STRING,
 				      EXPECTED_LEN);
@@ -107,7 +107,7 @@ static ssize_t debug_id_write(struct file *filp, const char __user *buf, size_t 
 	char *kbuf;
 	ssize_t ret = -EINVAL;
 
-	pr_info("debugfs: write() called. User provided %zu bytes.\n", size);
+	pr_trace("debugfs: write() called. User provided %zu bytes.\n", size);
 
 	if (size != EXPECTED_LEN && size != EXPECTED_LEN - 1) {
 		pr_warn("debugfs: Write failed. Expected length %zu or %zu, got %zu.\n",

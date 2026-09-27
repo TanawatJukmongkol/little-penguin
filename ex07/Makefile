@@ -2,13 +2,15 @@
 # Settings
 NAME		= debugfs
 CC			= cc
-CFLAGS		= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-sign-compare -g -DDEBUG
+TRACE_DBG	?= 0
+CFLAGS		= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-sign-compare -g -DDEBUG \
+			  -DTRACE_DBG=$(TRACE_DBG)
 BUILD_JOBS	= $(shell expr $(shell nproc) \* 3 / 2)
 MAKE_FLAGS	= -j$(BUILD_JOBS) -l$(shell nproc)
 
 # Kernel settings
 KERN_VERSION	= $(shell uname -r)
-KERN_BUILD		?= /lib/modules/$(KERN_VERSION)/build
+KERN_BUILD		?= ../linux
 
 # Source files
 SRCS		= $(addprefix src/, \

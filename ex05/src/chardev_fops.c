@@ -21,8 +21,8 @@ int device_open(struct inode *inode, struct file *file)
 out_unlock:
 	mutex_unlock(&dev.mutex);
 
-	pr_info("fortytwo: misc device '%s' opened (open count = %d)\n",
-		dev.name, dev.dev_open);
+	pr_trace("fortytwo: misc device '%s' opened (open count = %d)\n",
+		 dev.name, dev.dev_open);
 
 	return ret;
 }
@@ -43,8 +43,8 @@ int device_release(struct inode *inode, struct file *file)
 out_unlock:
 	mutex_unlock(&dev.mutex);
 
-	pr_info("fortytwo: misc device '%s' closed (open count = %d)\n",
-		dev.name, dev.dev_open);
+	pr_trace("fortytwo: misc device '%s' closed (open count = %d)\n",
+		 dev.name, dev.dev_open);
 
 	return ret;
 }
@@ -54,16 +54,16 @@ ssize_t device_read(struct file *file, char __user *buf, size_t len,
 {
 	ssize_t ret;
 
-	pr_info("fortytwo: read() called on '%s'. User requested %zu bytes.\n",
-		dev.name, len);
+	pr_trace("fortytwo: read() called on '%s'. User requested %zu bytes.\n",
+		 dev.name, len);
 
 	ret = simple_read_from_buffer(buf, len, off, EXPECTED_STRING,
 				      EXPECTED_LEN);
 	if (ret < 0)
 		pr_err("fortytwo: Failed to copy data to user space.\n");
 	else if (ret > 0)
-		pr_info("fortytwo: Successfully copied %zd bytes to user.\n",
-			ret);
+		pr_trace("fortytwo: Successfully copied %zd bytes to user.\n",
+			 ret);
 
 	return ret;
 }
@@ -74,7 +74,7 @@ ssize_t device_write(struct file *file, const char __user *buf, size_t len,
 	char *kbuf;
 	ssize_t ret = -EINVAL;
 
-	pr_info("fortytwo: write() called. User provided %zu bytes.\n", len);
+	pr_trace("fortytwo: write() called. User provided %zu bytes.\n", len);
 
 	if (len != EXPECTED_LEN && len != EXPECTED_LEN - 1) {
 		pr_warn("fortytwo: Write failed. Expected length %zu or %zu, got %zu.\n",

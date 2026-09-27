@@ -96,8 +96,8 @@ static ssize_t debug_id_read(struct file *filp, char __user *buf, size_t size, l
 	if (ret < 0)
 		pr_err("debugfs: Failed to copy data to user space.\n");
 	else if (ret > 0)
-		pr_info("debugfs: Successfully copied %zd bytes to user.\n",
-			ret);
+		pr_trace("debugfs: Successfully copied %zd bytes to user.\n",
+			 ret);
 
 	return ret;
 }

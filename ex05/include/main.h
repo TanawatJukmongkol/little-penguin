@@ -11,6 +11,17 @@
 #include <linux/string.h>
 #include "chardev.h"
 
+// Trace file open/close/read/write. Off by default; enable with `make TRACE_DBG=1`.
+#ifndef TRACE_DBG
+# define TRACE_DBG 0
+#endif
+
+#define pr_trace(fmt, ...)					\
+	do {							\
+		if (TRACE_DBG)					\
+			pr_info(fmt, ##__VA_ARGS__);		\
+	} while (0)
+
 int __init my_module_init(void);
 void __exit my_module_exit(void);
 

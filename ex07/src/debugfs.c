@@ -17,18 +17,18 @@ int init_debugfs(struct s_debug *dbg)
 		dbg->root = debugfs_create_dir(dbg->name, parent_root);
 		if (IS_ERR(dbg->root))
 			return -ENODEV;
-		pr_info("debugfs: entry \"%s\" {\n", dbg->name);
+		pr_trace("debugfs: entry \"%s\" {\n", dbg->name);
 		for (int i = 0; dbg->entry[i].type != DBG_END; i++) {
-			pr_info("\tdebugfs: entry #%d type %d\n", i, dbg->entry[i].type);
+			pr_trace("\tdebugfs: entry #%d type %d\n", i, dbg->entry[i].type);
 			dbg->entry[i].parent = dbg;
 			error = init_debugfs(&dbg->entry[i]);
 			if (error != 0)
 				return error;
 		}
-		pr_info("}\n");
+		pr_trace("}\n");
 		break;
 	case DBG_FILE:
-		pr_info("debugfs: file name: \"%s\"\n", dbg->name);
+		pr_trace("debugfs: file name: \"%s\"\n", dbg->name);
 		if (!dbg->init_file)
 			return 0;
 		error = dbg->init_file(dbg);
@@ -54,17 +54,17 @@ int dest_debugfs(struct s_debug *dbg)
 
 	switch (dbg->type) {
 	case DBG_DIR:
-		pr_info("debugfs: destroy entry \"%s\" {\n", dbg->name);
+		pr_trace("debugfs: destroy entry \"%s\" {\n", dbg->name);
 		for (int i = 0; dbg->entry[i].type != DBG_END; i++) {
 			error = dest_debugfs(&dbg->entry[i]);
 			if (error != 0)
 				return error;
 		}
-		pr_info("}\n");
+		pr_trace("}\n");
 		debugfs_remove(dbg->root);
 		break;
 	case DBG_FILE:
-		pr_info("debugfs: file name: \"%s\"\n", dbg->name);
+		pr_trace("debugfs: file name: \"%s\"\n", dbg->name);
 		debugfs_remove(dbg->root);
 		if (dbg->destruct) {
 			error = dbg->destruct(dbg);

@@ -28,8 +28,10 @@ unhook: linux
 # Commit the patches (git am) instead of leaving them as working-tree changes,
 # so the version string doesn't get "-dirty". Idempotent: already-committed
 # patches are skipped, and an uncommitted copy is taken out before committing.
-# Then (re)tag HEAD, see TAG.
+# Then (re)tag HEAD, see TAG. The index is refreshed first: stat info goes
+# stale across the host/VM share, and am/reset --keep then see "not uptodate".
 patch: linux
+	$(GIT_TREE) update-index -q --refresh
 	for p in $(PATCHES); do \
 		id=$$(cat $$p | $(PATCH_ID)); \
 		files=$$($(GIT_TREE) apply --numstat $(CURDIR)/$$p | cut -f3); \
@@ -44,6 +46,7 @@ patch: linux
 # Drop the patch commit again (only when it's the top commit; --keep leaves
 # other local changes alone), or reverse an uncommitted copy. The tag goes too.
 patch-r: linux
+	$(GIT_TREE) update-index -q --refresh
 	for p in $(PATCHES); do \
 		id=$$(cat $$p | $(PATCH_ID)); \
 		files=$$($(GIT_TREE) apply --numstat $(CURDIR)/$$p | cut -f3); \

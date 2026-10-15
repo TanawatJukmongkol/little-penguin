@@ -12,8 +12,27 @@ RUN mkdir -p /etc/nix \
  && echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 
 # git and bash-interactive already ship in the base image's default profile.
-RUN nix profile install nixpkgs#direnv \
+# gnused must be in the default profile (not just the devShell): the VS Code
+# server bootstrap and the devcontainer CLI run plain `sed` before direnv.
+RUN nix profile install nixpkgs#direnv nixpkgs#gnused nixpkgs#nix-ld \
  && ln -sf "$(command -v bash)" /bin/bash
+
+# VS Code's server ships a prebuilt node binary expecting an FHS loader at
+# /lib64/ld-linux-x86-64.so.2. nix-ld provides that shim and forwards to the
+# real Nix glibc loader with NIX_LD_LIBRARY_PATH; Nix-built binaries ignore it.
+# The /usr/lib links satisfy VS Code's check-requirements.sh. `nix build` (not
+# `nix eval`) so the store paths actually exist instead of dangling.
+RUN glibc="$(nix build --no-link --print-out-paths nixpkgs#glibc.out)" \
+ && gcclib="$(nix build --no-link --print-out-paths nixpkgs#gcc.cc.lib)" \
+ && mkdir -p /usr/lib /lib64 \
+ && ln -sf "$glibc/lib/libc.so.6" /usr/lib/libc.so.6 \
+ && ln -sf "$gcclib/lib/libstdc++.so.6" /usr/lib/libstdc++.so.6 \
+ && ln -sf /root/.nix-profile/libexec/nix-ld /lib64/ld-linux-x86-64.so.2 \
+ && ln -sfn "$glibc/lib/ld-linux-x86-64.so.2" /usr/lib/nix-ld-target \
+ && mkdir -p /usr/lib/nix-ld-libs \
+ && ln -sf "$glibc"/lib/* "$gcclib"/lib/* /usr/lib/nix-ld-libs/
+ENV NIX_LD=/usr/lib/nix-ld-target \
+    NIX_LD_LIBRARY_PATH=/usr/lib/nix-ld-libs
 
 RUN printf 'eval "$(direnv hook bash)"\n' >> /root/.bashrc
 

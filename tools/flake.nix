@@ -27,6 +27,7 @@
           buildInputs = with pkgs; [
             git
             gnumake
+            gnused
             binutils
             bc
             bison
